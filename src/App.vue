@@ -1298,7 +1298,7 @@ onUnmounted(() => {
         <!-- Botón circular de identidad (siempre visible), a la izquierda de la
              moneda de soporte, igual que en dotrino.com. -->
         <button class="identity-btn" data-testid="identity-btn" @click="openProfile" :aria-label="t('header.identity')" :title="t('header.identity')">👤</button>
-        <dotrino-support href="https://ko-fi.com/dotrino" repo="dotrino/pronostico-mundialista" discord="https://discord.gg/D648uq7cth" :lang="locale"></dotrino-support>
+        <dotrino-support href="https://ko-fi.com/dotrino" repo="imdotrino/dotrino-pronostico-mundialista" discord="https://discord.gg/D648uq7cth" :lang="locale"></dotrino-support>
       </div>
     </header>
 
