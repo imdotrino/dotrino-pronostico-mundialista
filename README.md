@@ -1,5 +1,7 @@
 # Pronóstico Mundialista
 
+> **Parte del ecosistema [Dotrino](https://dotrino.com).** Misión: aplicaciones que resuelven problemas comunes, respetando tu privacidad — sin anuncios, sin cookies, sin rastreo de datos, sin vender tu identidad a nadie.
+
 Aplicación de pronósticos del Mundial del ecosistema [Dotrino](https://dotrino.github.io/dotrino/): predice resultados de los partidos, compite con tus amigos y lleva tu tabla de aciertos. Como toda app del ecosistema, corre del lado del cliente y tú controlas tu información.
 
 ## Filosofía
