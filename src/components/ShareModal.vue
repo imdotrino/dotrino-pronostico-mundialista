@@ -52,7 +52,7 @@ watch(() => props.open, (o) => { if (o) generate() })
 
 const hint = computed(() => {
   const by = t('share.signedBy', { name: nickname.value || t('share.anonIdentity') })
-  return `${by} · ${t('share.scan')} mundial.dotrino.com`
+  return `${by} · ${t('share.scan')} pronostico.dotrino.com`
 })
 
 const theme = {

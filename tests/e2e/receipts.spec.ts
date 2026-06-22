@@ -33,7 +33,7 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
       notify: (category: string, opts: Record<string, unknown>) => { notifyCalls.push({ category, opts }); return Promise.resolve(null) },
     }
 
-    const url = 'https://mundial.dotrino.com/#BLOB123'
+    const url = 'https://pronostico.dotrino.com/#BLOB123'
 
     // Lado AUTOR (recibe). Identidad del autor = PK_A.
     const authorReceipts = createShareReceipts({
@@ -70,14 +70,14 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
   // Sobre estándar identificado.
   const env = r.env as Record<string, unknown>
   expect(env.__ccn).toBe(1)
-  expect(env.url).toBe('https://mundial.dotrino.com/#BLOB123')
+  expect(env.url).toBe('https://pronostico.dotrino.com/#BLOB123')
   expect(env.name).toBe('Mi pronóstico')
   expect((env.from as Record<string, unknown>).pubkey).toBe('PK_B')
   expect((env.from as Record<string, unknown>).nick).toBe('beta')
   // El autor recibió la notificación con el link en data.url.
   expect(r.notifyCount).toBe(1)
   expect(r.notify!.category).toBe('shareOpened')
-  expect((r.notify!.opts.data as Record<string, unknown>).url).toBe('https://mundial.dotrino.com/#BLOB123')
+  expect((r.notify!.opts.data as Record<string, unknown>).url).toBe('https://pronostico.dotrino.com/#BLOB123')
   expect(String(r.notify!.opts.title)).toContain('Abrieron')
   expect(String(r.notify!.opts.body)).toContain('Mi pronóstico')
 })

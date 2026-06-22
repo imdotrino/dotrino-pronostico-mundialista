@@ -1,5 +1,5 @@
 // Firma del pronóstico con la identidad ECDSA P-256 del vault id.dotrino.com
-// y armado del enlace/QR de compartir hacia mundial.dotrino.com.
+// y armado del enlace/QR de compartir hacia pronostico.dotrino.com.
 //
 // Para que el QR sea lo más liviano posible, el payload se empaqueta en UN solo
 // blob binario (base64url una sola vez), en vez de un JSON con campos ya en
@@ -27,7 +27,7 @@ import { requestSeal, verifySeal, sha256Base64url, type PredictionSeal } from '.
 export { getIdentity }
 export type { PredictionSeal }
 
-export const SHARE_BASE = 'https://mundial.dotrino.com/'
+export const SHARE_BASE = 'https://pronostico.dotrino.com/'
 
 const PAYLOAD_VERSION = 1
 const PAYLOAD_VERSION_SEALED = 2

@@ -10,8 +10,8 @@ import { test, expect, chromium } from '@playwright/test'
 // `ServiceWorker.deliverPushMessage` (lo mismo que el botón "Push" de DevTools).
 //
 // Corre contra el sitio DESPLEGADO (cert válido): un preview local con cert
-// autofirmado impide registrar el SW en headless. Default: mundial.dotrino.com.
-const SITE = process.env.SITE_URL || 'https://mundial.dotrino.com'
+// autofirmado impide registrar el SW en headless. Default: pronostico.dotrino.com.
+const SITE = process.env.SITE_URL || 'https://pronostico.dotrino.com'
 
 test('SW: el handler de push desplegado dispara cc-push-ring', async () => {
   test.setTimeout(90_000)

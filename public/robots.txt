@@ -4,4 +4,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mundial.dotrino.com/sitemap.xml
+Sitemap: https://pronostico.dotrino.com/sitemap.xml

@@ -132,7 +132,7 @@ const es = {
   import: {
     title: 'Importar pronóstico',
     help: 'Pega el enlace (o el código tras {hash}) que te compartieron.',
-    placeholder: 'https://mundial.dotrino.com/#...',
+    placeholder: 'https://pronostico.dotrino.com/#...',
     verifying: 'Verificando…',
     go: 'Importar y verificar',
   },
@@ -598,7 +598,7 @@ const en: typeof es = {
   import: {
     title: 'Import prediction',
     help: 'Paste the link (or the code after {hash}) that was shared with you.',
-    placeholder: 'https://mundial.dotrino.com/#...',
+    placeholder: 'https://pronostico.dotrino.com/#...',
     verifying: 'Verifying…',
     go: 'Import and verify',
   },

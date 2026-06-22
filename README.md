@@ -91,7 +91,7 @@ o ignorarlos**.
 - El pronóstico se codifica COMPLETO en una cadena **base64url** (codec v3:
   modo + posiciones + ranking de terceros + ganadores de llaves + resultados con
   goles y penales) — todo lo necesario para **reconstruirlo desde el link**.
-- Se **firma con ECDSA P-256** y se arma `https://mundial.dotrino.com/#<payload>`
+- Se **firma con ECDSA P-256** y se arma `https://pronostico.dotrino.com/#<payload>`
   mostrado como **QR**. El payload va **empaquetado en un solo blob binario**
   (versión + firma + **clave pública comprimida** de 33 bytes + código +
   apodo + **nombre** del pronóstico, máx 50) y base64url **una vez** — QR liviano.
@@ -237,19 +237,19 @@ npm run test:e2e   # Playwright (round-trip del link + salas: enlaces, UI y
 > Tailscale). El navegador avisará del cert no confiable: aceptar. `allowedHosts`
 > ya incluye `.ts.net` y `.local`. (Producción no usa esto.)
 
-Deploy a GitHub Pages (dominio `mundial.dotrino.com`) vía GitHub Actions en
+Deploy a GitHub Pages (dominio `pronostico.dotrino.com`) vía GitHub Actions en
 cada push a `main` (`.github/workflows/deploy.yml`).
 
 ## Analítica
 
 Tráfico **cookieless y autohosteado** con **GoatCounter** en `goat.dotrino.com`
 (agregados, sin cookies ni datos personales). Solo cuenta en **producción**
-(`mundial.dotrino.com`): nunca en dev/local, LAN ni previews (`src/lib/analytics.ts`).
+(`pronostico.dotrino.com`): nunca en dev/local, LAN ni previews (`src/lib/analytics.ts`).
 
 > **Convención del ecosistema:** `goat.dotrino.com` es una instancia **compartida**
 > por todas las apps Dotrino. Para que en el dashboard se distinga a qué app
 > pertenece cada link, **los paths deben llevar el dominio por delante**
-> (p. ej. `mundial.dotrino.com/tab/scores` en vez de `/tab/scores`). Esto aplica
+> (p. ej. `pronostico.dotrino.com/tab/scores` en vez de `/tab/scores`). Esto aplica
 > tanto a los pageviews (callback `path` definido antes de cargar `count.js`) como
 > a los eventos (`trackEvent`). El resto de las apps lo hacen con
 > `window.goatcounter={path:function(p){return location.hostname+p}}` en su

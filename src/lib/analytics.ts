@@ -2,10 +2,10 @@
 // goat.dotrino.com): agregados, sin cookies ni datos personales, tus datos en
 // tu server (coherente con la ideología Dotrino).
 //
-// Solo cuenta en PRODUCCIÓN (mundial.dotrino.com): nunca en dev/local, LAN ni
+// Solo cuenta en PRODUCCIÓN (pronostico.dotrino.com): nunca en dev/local, LAN ni
 // previews. Carga el script de forma diferida, sin bloquear el arranque.
 
-const PROD_HOST = 'mundial.dotrino.com'
+const PROD_HOST = 'pronostico.dotrino.com'
 const GOATCOUNTER = 'https://goat.dotrino.com'
 
 interface GoatCounter { count: (vars: { path: string; title?: string; event?: boolean }) => void }
@@ -19,7 +19,7 @@ function enabled (): boolean {
 }
 
 // Como goat.dotrino.com es compartido por varias apps del ecosistema, los
-// paths deben llevar el dominio por delante (p. ej. `mundial.dotrino.com/tab/x`)
+// paths deben llevar el dominio por delante (p. ej. `pronostico.dotrino.com/tab/x`)
 // para distinguir a qué app pertenece cada link en el dashboard.
 function withDomain (path: string): string {
   return `${PROD_HOST}/${path.replace(/^\/+/, '')}`

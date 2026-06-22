@@ -349,7 +349,7 @@ const groupResultViews = computed<GroupResultView[]>(() =>
       <img v-if="qrDataUrl" :src="qrDataUrl" :alt="t('print.qrAlt')" class="qr" />
       <div class="pf-text">
         <p class="pf-scan">{{ t('print.scan') }}</p>
-        <p class="pf-url">mundial.dotrino.com</p>
+        <p class="pf-url">pronostico.dotrino.com</p>
       </div>
     </footer>
   </div>
