@@ -232,14 +232,17 @@ async function removeContact (pk: string) {
       </i18n-t>
 
       <!-- PERFIL: tarjeta compartida del ecosistema en modo self (nombre editable
-           guardado en el vault + mi reputación). Las notificaciones push son
-           propias de esta app y van debajo. -->
+           guardado en el vault + mi reputación). `allow-edit` es obligatorio desde
+           @dotrino/profile 0.10: sin él la tarjeta self es SOLO LECTURA y se
+           rompería el onboarding "ponte un apodo" (ensureNick, para poder firmar
+           al compartir). Las notificaciones push son propias de esta app: van debajo. -->
       <section v-show="tab === 'perfil'" class="body">
         <p v-if="requireNick && !myNick" class="focus-note">{{ t('identity.requireNickShare') }}</p>
         <dotrino-profile
           v-if="!unreachable && myPubkey"
           :ref="bindProfile"
           mode="self"
+          allow-edit
           :style="profileTheme"
           :lang="locale"
           :pubkey="myPubkey"

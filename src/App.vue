@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted, onUnmounted, nextTick, provide } from 'vue'
+import { reactive, ref, shallowRef, computed, watch, watchEffect, onMounted, onUnmounted, nextTick, provide } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLocale, type Locale } from './i18n'
+// Barra superior estándar del ecosistema (CONVENCIONES §5): marca + volver +
+// idioma + perfil + moneda de support en un solo Web Component.
+import '@dotrino/topbar'
+import type { IdentityInstance } from './lib/identity'
+import { getReputation } from './lib/reputation'
 import { GROUPS, teamById } from './lib/teams'
 import {
   defaultPrediction, clonePrediction, champion, prunePicks,
@@ -654,9 +659,44 @@ async function printEntry (id: string) {
   }
 }
 
-// Cambia el idioma de la interfaz (ES/EN) y persiste la preferencia.
-function changeLocale (l: Locale) {
-  setLocale(l)
+// ---- Barra superior estándar (<dotrino-topbar>) ----------------------------
+// El header lo aporta el Web Component compartido (marca + volver + idioma +
+// perfil + moneda de support): la app no reimplementa el header del ecosistema.
+// `shallowRef`: son instancias externas (el vault vive en un iframe); no deben
+// envolverse en un proxy reactivo antes de pasárselas al componente.
+const topbarRef = ref<HTMLElement | null>(null)
+const identityInst = shallowRef<IdentityInstance | null>(null)
+const reputationInst = shallowRef<Awaited<ReturnType<typeof getReputation>>>(null)
+
+// El topbar usa la identidad para mostrar en el botón el AVATAR del perfil
+// ACTIVO (§6.1) en vez de la silueta genérica.
+watchEffect(() => {
+  const tb = topbarRef.value as (HTMLElement & { identity?: unknown; reputation?: unknown }) | null
+  if (!tb) return
+  tb.identity = identityInst.value ?? null
+  tb.reputation = reputationInst.value ?? null
+})
+
+onMounted(async () => {
+  identityInst.value = await getIdentity()
+  if (identityInst.value) reputationInst.value = await getReputation()
+})
+
+// El idioma lo manda el topbar: es dueño del toggle ES/EN y persiste la
+// preferencia en `dotrino.lang` (compartida con el resto del ecosistema). La app
+// solo sigue lo que él decide.
+function onLang (e: Event) {
+  const l = (e as CustomEvent<{ lang: Locale }>).detail?.lang
+  if (l === 'es' || l === 'en') setLocale(l)
+}
+
+// Botón de perfil del topbar: esta app abre su PROPIO panel de identidad (perfil
+// + contactos + rankings + notificaciones push), así que cancelamos el modal que
+// el topbar abriría solo. La tarjeta de perfil sigue siendo la compartida
+// (<dotrino-profile>, dentro de IdentityPanel): no se reimplementa nada.
+function onTopbarProfile (e: Event) {
+  e.preventDefault()
+  openProfile()
 }
 
 function openProfile () {
@@ -1279,28 +1319,32 @@ onUnmounted(() => {
       @sharedaily="shareDaily(); sidebarOpen = false"
     />
     <div class="main">
-    <header class="scoreboard">
-      <button class="menu" data-testid="menu-btn" @click="sidebarOpen = true" :aria-label="t('header.menu')">☰</button>
-      <!-- En móvil el chevron va a la izquierda del logo; en web vive en el
-           sidebar, junto a "Pronósticos" (ver Sidebar.vue). -->
-      <dotrino-back class="cc-back cc-back-sc"></dotrino-back>
-      <img src="/favicon.svg" :alt="t('header.logo')" class="brand-logo" />
-      <div class="title">
-        <span class="cup">{{ t('header.cup') }}</span>
-        <h1>{{ t('header.title') }} <em>2026</em></h1>
-      </div>
-      <div class="hdr-right">
-        <!-- Selector de idioma compacto (ES | EN) -->
-        <div class="lang-selector" data-testid="lang-selector" role="group" :aria-label="t('lang.label')">
-          <button data-testid="lang-es" :class="{ on: locale === 'es' }" @click="changeLocale('es')">{{ t('lang.es') }}</button>
-          <button data-testid="lang-en" :class="{ on: locale === 'en' }" @click="changeLocale('en')">{{ t('lang.en') }}</button>
+    <!-- Barra superior ESTÁNDAR del ecosistema (CONVENCIONES §5). Ya trae dentro
+         el chevron de volver, el toggle ES/EN, el botón de perfil (§6.1) y la
+         moneda de <dotrino-support> (§6): no se re-arman a mano. Lo propio de
+         esta app va por slots: la marca del Mundial y la hamburguesa del cajón. -->
+    <dotrino-topbar
+      ref="topbarRef"
+      class="scoreboard"
+      brand-href="./"
+      :lang="locale"
+      profile
+      support-href="https://ko-fi.com/dotrino"
+      support-repo="imdotrino/dotrino-pronostico-mundialista"
+      support-discord="https://discord.gg/D648uq7cth"
+      @dotrino-lang="onLang"
+      @dotrino-profile="onTopbarProfile"
+    >
+      <div slot="brand" class="brand">
+        <img src="/favicon.svg" :alt="t('header.logo')" class="brand-logo" />
+        <div class="title">
+          <span class="cup">{{ t('header.cup') }}</span>
+          <h1>{{ t('header.title') }} <em>2026</em></h1>
         </div>
-        <!-- Botón circular de identidad (siempre visible), a la izquierda de la
-             moneda de soporte, igual que en dotrino.com. -->
-        <button class="identity-btn" data-testid="identity-btn" @click="openProfile" :aria-label="t('header.identity')" :title="t('header.identity')">👤</button>
-        <dotrino-support href="https://ko-fi.com/dotrino" repo="imdotrino/dotrino-pronostico-mundialista" discord="https://discord.gg/D648uq7cth" :lang="locale"></dotrino-support>
       </div>
-    </header>
+      <!-- Cajón "Mis pronósticos": solo en móvil (en web la barra lateral es fija). -->
+      <button slot="trailing" class="menu" data-testid="menu-btn" @click="sidebarOpen = true" :aria-label="t('header.menu')">☰</button>
+    </dotrino-topbar>
 
     <!-- Barra activa de SALA: muestra claramente en qué sala estás. -->
     <div v-if="section === 'rooms' && activeRoom" class="active-bar rooms-bar" data-testid="room-active-bar">
@@ -1685,9 +1729,9 @@ onUnmounted(() => {
   .shell { display: flex; align-items: stretch; height: 100vh; overflow: hidden; }
   .main { flex: 1; height: 100vh; min-height: 0; display: flex; flex-direction: column; }
   .menu { display: none; }
-  /* En web el chevron vive en el sidebar (junto a "Pronósticos"), no en el header. */
-  .cc-back-sc { display: none; }
-  .scoreboard { padding-left: 1.2rem; }
+  /* En web el chevron vive en el sidebar (junto a "Pronósticos"), no en el
+     header: ocultamos el que trae el topbar para no duplicarlo. */
+  .scoreboard::part(back) { display: none; }
 
   /* El contenido scrollea internamente (grupos+terceros o llaves completas). */
   .content { flex: 1; min-height: 0; overflow-y: auto; }
@@ -1701,25 +1745,6 @@ onUnmounted(() => {
   .active-bar { padding-inline: clamp(1rem, calc((100% - 1100px) / 2), 16rem); }
 }
 
-.hdr-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
-/* Selector de idioma compacto (ES | EN) */
-.lang-selector {
-  display: inline-flex; border: 1px solid var(--line); border-radius: 8px;
-  overflow: hidden; background: rgba(65, 180, 255, 0.08);
-}
-.lang-selector button {
-  background: transparent; color: var(--muted); border: none; cursor: pointer;
-  font-family: inherit; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.04em;
-  padding: 0.35rem 0.5rem; line-height: 1;
-}
-.lang-selector button:hover { background: rgba(65, 180, 255, 0.16); color: var(--text); }
-.lang-selector button.on { background: var(--azure); color: #042038; }
-.identity-btn {
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
-  background: rgba(65, 180, 255, 0.12); color: var(--text); border: 1px solid var(--line);
-}
-.identity-btn:hover { background: rgba(65, 180, 255, 0.22); }
 /* Botón "Instalar App" en el flujo de la barra, centrado (no flota, no tapa). */
 /* Botón "Instalar App" (Web Component <dotrino-install>): reusa el look del
    antiguo .install-inline vía custom properties + ::part(button). */
@@ -1739,15 +1764,23 @@ onUnmounted(() => {
 }
 .cc-install::part(button):hover { filter: brightness(1.06); }
 
-/* Scoreboard header */
+/* Scoreboard header = <dotrino-topbar> del ecosistema, tematizado con los
+   colores del "estadio nocturno" (el componente viene oscuro/morado por
+   defecto). El sticky va en el host: el .bar interno no lo es. */
 .scoreboard {
-  display: flex; align-items: center; gap: 0.6rem;
-  padding: 0.7rem 0.9rem; position: sticky; top: 0; z-index: 50;
-  background: linear-gradient(180deg, rgba(16, 42, 82, 0.96), rgba(10, 23, 48, 0.96));
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 50;
+  --dotrino-topbar-bg: linear-gradient(180deg, rgba(16, 42, 82, 0.96), rgba(10, 23, 48, 0.96));
+  --dotrino-topbar-border: var(--line);
+  --dotrino-topbar-text: var(--text);
+  --dotrino-topbar-muted: var(--muted);
+  --dotrino-topbar-accent: var(--azure);
+  --dotrino-topbar-accent-text: #042038;
+  --dotrino-topbar-font: var(--font-body);
+  --dotrino-topbar-pad: 0.7rem 0.9rem;
+  --dotrino-topbar-gap: 0.6rem;
 }
-.cc-back { color: var(--text, #fff); --cc-back-size: 40px; flex-shrink: 0; }
+/* Marca a medida (slot "brand"): escudo + "Mundial · Pronóstico 2026". */
+.brand { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
 .menu {
   background: rgba(65, 180, 255, 0.12); color: var(--text);
   border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
@@ -1755,8 +1788,8 @@ onUnmounted(() => {
 }
 .menu:hover { background: rgba(65, 180, 255, 0.22); }
 .brand-logo { width: 38px; height: 38px; flex-shrink: 0; object-fit: contain; }
-.title { flex: 1; text-align: center; line-height: 1; }
-.cup { font-size: 0.6rem; letter-spacing: 0.28em; color: var(--azure); font-weight: 700; text-transform: uppercase; }
+.title { line-height: 1; min-width: 0; }
+.cup { display: block; font-size: 0.6rem; letter-spacing: 0.28em; color: var(--azure); font-weight: 700; text-transform: uppercase; }
 .title h1 { font-size: 1.5rem; margin-top: 2px; }
 .title h1 em { color: var(--azure); font-style: normal; }
 
@@ -2006,6 +2039,15 @@ onUnmounted(() => {
 .invite-toast .it-ignore {
   background: transparent; color: var(--muted); border: 1px solid var(--line);
   border-radius: 8px; padding: 0.4rem 0.7rem; cursor: pointer;
+}
+
+/* Móvil: la marca se queda en su fila y las acciones bajan a una SEGUNDA fila
+   alineada a la derecha (CONVENCIONES §5). Sin esto la marca del Mundial ("48
+   selecciones" + "Pronóstico 2026") se come el ancho y las acciones se
+   reparten una por línea. El grupo de acciones es row-reverse: con
+   flex-basis:100% ocupa la fila y sus botones quedan pegados a la derecha. */
+@media (max-width: 560px) {
+  .scoreboard::part(actions) { flex-basis: 100%; }
 }
 
 @media (max-width: 480px) {

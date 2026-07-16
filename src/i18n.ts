@@ -1,9 +1,13 @@
 // Configuración de internacionalización (español/inglés) con vue-i18n.
-// El idioma inicial se lee de localStorage (clave `mundial.lang`); si no hay
-// preferencia guardada, se infiere de `navigator.language`.
+// El idioma inicial se lee de localStorage (clave `dotrino.lang`, COMPARTIDA con
+// el resto del ecosistema: es la que persiste <dotrino-topbar>, dueño del toggle
+// ES/EN); si no hay preferencia guardada, se infiere de `navigator.language`.
 import { createI18n } from 'vue-i18n'
 
-const STORAGE_KEY = 'mundial.lang'
+const STORAGE_KEY = 'dotrino.lang'
+// Clave propia anterior (cuando la app tenía su propio selector de idioma). Se
+// migra UNA vez a la clave del ecosistema para no resetear a quien ya eligió.
+const LEGACY_KEY = 'mundial.lang'
 
 export type Locale = 'es' | 'en'
 
@@ -25,16 +29,12 @@ const es = {
     editCopy: 'Editar copia',
     reorder: 'Reordenar',
   },
-  lang: {
-    label: 'Idioma',
-    es: 'ES',
-    en: 'EN',
-  },
+  // El toggle de idioma y el botón de perfil los aporta <dotrino-topbar> con sus
+  // propios textos: la app ya no traduce esas etiquetas.
   header: {
     cup: 'Mundial · 48 selecciones',
     title: 'Pronóstico',
     menu: 'Mis pronósticos',
-    identity: 'Mi identidad',
     logo: 'Logo',
   },
   active: {
@@ -491,16 +491,10 @@ const en: typeof es = {
     editCopy: 'Edit copy',
     reorder: 'Reorder',
   },
-  lang: {
-    label: 'Language',
-    es: 'ES',
-    en: 'EN',
-  },
   header: {
     cup: 'World Cup · 48 teams',
     title: 'Prediction',
     menu: 'My predictions',
-    identity: 'My identity',
     logo: 'Logo',
   },
   active: {
@@ -936,8 +930,21 @@ const en: typeof es = {
   },
 }
 
+// Migración única de la preferencia vieja (`mundial.lang`) a la clave del
+// ecosistema (`dotrino.lang`). Corre antes del primer render, así el topbar lee
+// el idioma que el usuario ya tenía elegido.
+function migrateLegacyLang (): void {
+  try {
+    const legacy = localStorage.getItem(LEGACY_KEY)
+    if (!legacy) return
+    if (!localStorage.getItem(STORAGE_KEY)) localStorage.setItem(STORAGE_KEY, legacy)
+    localStorage.removeItem(LEGACY_KEY)
+  } catch { /* modo privado: seguimos con el idioma del navegador */ }
+}
+
 // Idioma inicial: preferencia guardada, o inferida del navegador.
 function initialLocale (): Locale {
+  migrateLegacyLang()
   const saved = localStorage.getItem(STORAGE_KEY)
   if (saved === 'es' || saved === 'en') return saved
   return navigator.language?.startsWith('en') ? 'en' : 'es'

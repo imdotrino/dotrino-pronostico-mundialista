@@ -1,7 +1,11 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import '@dotrino/support'
+// Barra superior estándar del ecosistema (CONVENCIONES §5): trae dentro la
+// marca, el chevron de volver, el toggle de idioma, el botón de perfil y la
+// moneda de <dotrino-support>. Por eso la app ya NO importa @dotrino/support:
+// viaja dentro del topbar (y así no quedan dos copias del Web Component).
+import '@dotrino/topbar'
 import '@dotrino/install'
 import '@dotrino/share'
 import { createBackNav } from '@dotrino/nav'
