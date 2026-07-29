@@ -70,15 +70,24 @@ export class ProxyTokenError extends Error {
 }
 
 /**
- * Resuelve un token corto a la identidad real del peer mediante un
- * challenge/response firmado a través del proxy.
+ * Resuelve un CÓDIGO CORTO (una "cita") a la identidad real del peer.
  *
- * @param token  Token destino (4-8 alfanuméricos, en mayúsculas).
- * @param id     Instancia del vault de identidad (para crear y verificar el challenge).
- * @param timeoutMs  Tiempo máximo de espera por la respuesta del peer.
+ * Son dos pasos, y antes había uno solo:
+ *   1. canjear el código contra el proxio → devuelve la INSTANCIA del peer
+ *      (su dirección, en el proxio que sea);
+ *   2. challenge/response firmado contra esa instancia.
+ *
+ * El paso 1 no existía porque el identificador de una conexión ERA un código de
+ * 4 caracteres, así que lo tecleado se podía usar directo como dirección. Ya no:
+ * la dirección es una instancia de 34 caracteres sensible a mayúsculas, que
+ * nadie puede dictar — de ahí que exista la cita.
+ *
+ * @param code  Código de 6 caracteres que compartió la otra persona.
+ * @param id    Instancia del vault de identidad (crea y verifica el challenge).
+ * @param timeoutMs  Tiempo máximo de espera.
  */
 export function resolveTokenToIdentity (
-  token: string,
+  code: string,
   id: ChallengeMaker,
   timeoutMs = 12000,
 ): Promise<ResolveTokenResult> {
@@ -86,6 +95,8 @@ export function resolveTokenToIdentity (
     let ws: WebSocket | null = null
     let settled = false
     let timer: ReturnType<typeof setTimeout> | null = null
+    // Se llena al canjear la cita; hasta entonces no hay a quién escribirle.
+    let target: string | null = null
 
     const cleanup = () => {
       if (timer) { clearTimeout(timer); timer = null }
@@ -142,14 +153,27 @@ export function resolveTokenToIdentity (
 
       switch (frame.type) {
         case 'connected': {
-          // Ya tenemos token propio: lanzamos el challenge contra el destino.
-          // El nonce lo crea el vault para poder verificar luego la respuesta.
+          // Primero se canjea la cita: el proxio la resuelve contra el nodo que
+          // la emitió y devuelve la instancia de esa persona.
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'pair-redeem', code }))
+          }
+          break
+        }
+        case 'pair-redeem': {
+          const r = frame as unknown as { ok?: boolean, instance?: string }
+          if (!r.ok || !r.instance) {
+            fail(new ProxyTokenError('Ese código no vale o ya caducó. Pídele uno nuevo.'))
+            break
+          }
+          target = r.instance
+          // Con la dirección en mano, el challenge firmado de siempre.
           ;(async () => {
             try {
               const { nonce } = await id.makeChallenge()
               const msg = formatMessage('IDENTIFY_CHALLENGE', { nonce })
-              if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ to: [token], message: msg }))
+              if (ws && ws.readyState === WebSocket.OPEN && target) {
+                ws.send(JSON.stringify({ to: [target], message: msg }))
               }
             } catch {
               fail(new ProxyTokenError('No se pudo generar el challenge de identidad.'))

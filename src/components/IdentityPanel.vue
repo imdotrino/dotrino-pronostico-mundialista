@@ -150,7 +150,7 @@ async function addContact () {
 
   // Si estamos enfocados en un autor (ya tenemos su clave) y no se escribió
   // token, lo agregamos directamente por su clave pública (no hace falta token).
-  const token = newToken.value.trim().toUpperCase()
+  let token = newToken.value.trim()
   if (props.focusPubkey && !token) {
     adding.value = true
     try {
@@ -165,8 +165,14 @@ async function addContact () {
     return
   }
 
-  // Normalizamos el token tal como hace el messenger: mayúsculas, sin espacios.
-  if (!/^[A-Z0-9]{4,8}$/.test(token)) {
+  // Mismo criterio que el proxio: se traduce lo que se confunde al leer o al
+  // dictar, y solo lo que NUNCA se emite (para no romper un código bueno).
+  const CONFUSABLES: Record<string, string> = { I: '1', L: '1', S: '5', Z: '2', B: '8', G: '6', '0': 'O' }
+  token = [...token.toUpperCase()]
+    .filter((c) => c !== ' ' && c !== '-' && c !== '_')
+    .map((c) => CONFUSABLES[c] ?? c)
+    .join('')
+  if (!/^[1-9ACDEFHJKMNOPQRTUVWXY]{6}$/.test(token)) {
     addError.value = t('identity.tokenInvalid')
     return
   }
