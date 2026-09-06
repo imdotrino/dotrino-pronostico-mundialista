@@ -35,9 +35,8 @@ async function identifyWithVault (c: WebSocketProxyClient) {
   const publickey = id?.me?.publickey
   if (!id || !publickey || !c.token) return
   try {
-    const data = { op: 'identify', publickey, token: c.token, ts: Date.now() }
-    const { signature } = await id.signData(data)
-    await c.identify({ data, signature })
+    // El sobre lo arma el pilar (`identifyAs`), que le pone el destinatario.
+    await c.identifyAs({ publickey, sign: (d: any) => id.signData(d) })
     myPublickey = publickey
     // Si el usuario activó notificaciones, re-registrar la push subscription
     // (los endpoints pueden rotar). Import dinámico para evitar ciclo de módulos.
