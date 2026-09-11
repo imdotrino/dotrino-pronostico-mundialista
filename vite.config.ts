@@ -57,11 +57,26 @@ export default defineConfig(({ command }) => ({
       },
       // Sin precache: el SW existe para instalabilidad PWA + Web Push.
       workbox: {
-        globPatterns: [],
+        // Navegación NETWORK-FIRST y el resto CACHE-FIRST (CONVENCIONES §3). Estaba
+        // todo vacío, así que el Service Worker existía y no guardaba nada: la app
+        // nunca funcionó sin conexión. El `index.html` queda fuera del precache a
+        // propósito (es lo único sin hash: precachearlo sirve un HTML viejo que
+        // apunta a chunks que ya no existen).
+        globPatterns: ['**/*.{js,css,svg,png,ico,webmanifest,jpg}'],
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        runtimeCaching: [],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }: { request: Request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pronostico-html',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 8 }
+            }
+          }
+        ],
         navigateFallback: null,
         // Inyecta el handler de Web Push (push + notificationclick) en el SW de
         // Workbox. El archivo se sirve desde public/ (copia del paquete
