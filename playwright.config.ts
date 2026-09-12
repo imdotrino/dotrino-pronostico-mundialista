@@ -9,7 +9,14 @@ const BASE = process.env.E2E_BASE || `https://localhost:${PORT}`
 
 export default defineConfig({
   testDir: 'tests/e2e',
-  fullyParallel: true,
+  // DE UNO EN UNO. Varios specs hablan con el PROXIO REAL (`rooms`, `sellado`): salas,
+  // cola offline de 24 h y directorio de llaves de cifrado. Correrlos a la vez pone a
+  // competir varias identidades por la misma malla de nodos y lo que falla no es la app
+  // —la cola queda en el nodo donde el destinatario tiene su casa—, así que se prueba la
+  // concurrencia del proxio en vez de lo que se quería probar. La suite entera tarda
+  // ~1,5 min; verde de verdad vale más que verde rápido.
+  fullyParallel: false,
+  workers: 1,
   retries: 0,
   reporter: 'list',
   use: {

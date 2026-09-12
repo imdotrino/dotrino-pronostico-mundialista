@@ -1,4 +1,5 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
+import { vaultInit, llaves, type VaultKeys } from './_vault'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -14,31 +15,14 @@ import path from 'node:path'
 const BASE = process.env.E2E_BASE || 'https://localhost:5180'
 const SHOT_DIR = path.resolve('test-results/rooms-2browser')
 
-// Vault de prueba: replica el contrato del vault real (signData + me.publickey)
-// con el MISMO formato de pubkey que reconstruye parseShareFragment/verifyBlob.
-const vaultInit = (nick: string) => `
-window.__TEST_VAULT_PROMISE__ = (async () => {
-  const kp = await crypto.subtle.generateKey({ name:'ECDSA', namedCurve:'P-256' }, true, ['sign','verify']);
-  const j = await crypto.subtle.exportKey('jwk', kp.publicKey);
-  const pub = JSON.stringify({ kty:'EC', crv:'P-256', x:j.x, y:j.y, ext:true });
-  const canon = (v) => (v===null||typeof v!=='object') ? JSON.stringify(v)
-    : Array.isArray(v) ? '['+v.map(canon).join(',')+']'
-    : '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canon(v[k])).join(',')+'}';
-  let nickname = ${JSON.stringify(nick)};
-  return {
-    me: { publickey: pub, nickname },
-    async signData(data){
-      const sig = new Uint8Array(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'}, kp.privateKey, new TextEncoder().encode(canon(data))));
-      let s=''; for(const b of sig) s+=String.fromCharCode(b);
-      return { signature: btoa(s), publickey: pub };
-    },
-    async listContacts(){ return []; },
-    async setMyNickname(a){ nickname = (a && a.nickname) || nickname; this.me.nickname = nickname; },
-  };
-})();`
+// El vault de prueba vive en `_vault.ts` (firma + CIFRADO): es el mismo contrato para
+// todos los specs, y desde que los mensajes dirigidos van sellados también hace falta su
+// mitad de cifrado.
 
-async function installVault (context: BrowserContext, nick: string) {
-  await context.addInitScript(vaultInit(nick))
+async function installVault (context: BrowserContext, nick: string, keys?: VaultKeys) {
+  // Con `keys` la identidad SOBREVIVE al reload: sin ellas el vault de prueba genera un
+  // par nuevo en cada carga, o sea otra persona, y una sala no converge con fantasmas.
+  await context.addInitScript(vaultInit(nick, keys))
   // Reloj ANTES del torneo (sin partidos hoy/mañana) + tutorial ya visto: ni el
   // popup diario ni las burbujas se cruzan con los clicks de este spec.
   await context.addInitScript(`
@@ -49,17 +33,32 @@ async function installVault (context: BrowserContext, nick: string) {
 
 // Siembra una sala compartida + un pronóstico propio en localStorage (evita el
 // baile de crear/unirse por UI) y deja la sala activa.
-async function seed (page: Page, roomId: string, nick: string) {
-  await page.evaluate(async ({ roomId, nick }) => {
+//
+// `hostPubkey` NO es un adorno: una sala siempre nace de una invitación, y esa invitación
+// lleva firmada la clave de quien la creó. Es por ahí por donde se conocen los miembros —
+// desde que lo dirigido va SELLADO (§4.1) se manda por identidad y no por el token del
+// canal, y un token no dice de quién es, así que no hay a quién sellarle. Sembrarlo vacío
+// era sembrar una sala que en la vida real no existe.
+async function seed (page: Page, roomId: string, nick: string, hostPubkey: string) {
+  await page.evaluate(async ({ roomId, nick, hostPubkey }) => {
     const { defaultPrediction } = await import('/src/lib/prediction.ts')
     const { encodePrediction } = await import('/src/lib/codec.ts')
     const now = Date.now()
     const pred = { id: 'p1', name: 'Pronóstico de ' + nick, code: encodePrediction(defaultPrediction()), mine: true, official: false, updatedAt: now }
     localStorage.setItem('mundial.library.v1', JSON.stringify([pred]))
-    const room = { id: roomId, name: 'Sala demo', mode: 'free', sealedUntil: 0, hostPubkey: '', hostNick: '', mine: false, createdAt: now, updatedAt: now, members: [] }
+    const room = { id: roomId, name: 'Sala demo', mode: 'free', sealedUntil: 0, hostPubkey, hostNick: 'Ana', mine: false, createdAt: now, updatedAt: now, members: [] }
     localStorage.setItem('mundial.rooms.v1', JSON.stringify([room]))
     localStorage.setItem('mundial.activeRoomId.v1', roomId)
-  }, { roomId, nick })
+  }, { roomId, nick, hostPubkey })
+}
+
+/** La pubkey del vault de prueba de esta pestaña (la que firma y por la que se enruta). */
+async function pubkeyDe (page: Page): Promise<string> {
+  return page.evaluate(async () => {
+    const { getIdentity } = await import('/src/lib/identity.ts')
+    const id = await getIdentity()
+    return id?.me?.publickey as string
+  })
 }
 
 async function openRoomsSection (page: Page) {
@@ -132,8 +131,8 @@ test('dos navegadores: aportar → sync por gossip → borrar (tombstone firmado
 
   const ctxA = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 820 } })
   const ctxB = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 820 } })
-  await installVault(ctxA, 'Ana')
-  await installVault(ctxB, 'Beto')
+  await installVault(ctxA, 'Ana', await llaves())
+  await installVault(ctxB, 'Beto', await llaves())
   const A = await ctxA.newPage()
   const B = await ctxB.newPage()
 
@@ -144,8 +143,12 @@ test('dos navegadores: aportar → sync por gossip → borrar (tombstone firmado
   }
 
   try {
-    await A.goto(BASE + '/'); await seed(A, roomId, 'Ana'); await A.reload()
-    await B.goto(BASE + '/'); await seed(B, roomId, 'Beto'); await B.reload()
+    // Ana crea la sala (es la anfitriona) y Beto entra por su enlace: por eso los dos
+    // guardan la MISMA `hostPubkey`, que es la de Ana.
+    await A.goto(BASE + '/')
+    const pkAna = await pubkeyDe(A)
+    await seed(A, roomId, 'Ana', pkAna); await A.reload()
+    await B.goto(BASE + '/'); await seed(B, roomId, 'Beto', pkAna); await B.reload()
 
     await openRoomsSection(A)
     await openRoomsSection(B)

@@ -28,6 +28,11 @@ const myPubkey = ref<string | null>(null)
 const myNick = ref<string>('')
 const contacts = ref<PeerInfo[]>([])
 const unreachable = ref(false)
+// Miembros de la sala activa a los que NO se les puede sellar (su app todavía no
+// anunció llave de cifrado). No se les manda en claro, así que se quedan fuera de la
+// sincronización: eso se ENSEÑA, porque callarlo es dejar a alguien fuera sin que nadie
+// lo sepa y sin nada que mirar.
+const unsealable = ref<string[]>([])
 // Sub-pestaña de la sala activa (compartida para que la barra lateral y el
 // header puedan llevar al usuario a la sección de invitar/compartir).
 const roomTab = ref<'table' | 'compare' | 'matches'>('table')
@@ -78,16 +83,23 @@ function ensureSync () {
 // --- Sincronización ---------------------------------------------------------
 function startSync (room: Room) {
   stopSync()
+  unsealable.value = []
   const myEnv = room.members.find((m) => m.publickey === myPubkey.value)?.env ?? null
   sync = new RoomSync(room.id, myEnv, {
     onPrediction: (env) => applyEnvelope(env),
     onPeerCount: (n) => { peerCount.value = n },
     onStatus: (s) => { syncStatus.value = s },
+    onUnreachable: (pk) => { if (!unsealable.value.includes(pk)) unsealable.value = [...unsealable.value, pk] },
     // Miembros conocidos (sin mí): para entrega online + cola offline por pubkey.
+    // EL CREADOR ENTRA AUNQUE NO HAYA APORTADO: al entrar por el enlace es el único al
+    // que se conoce, y desde que lo dirigido va solo por identidad (ya no por token del
+    // canal) es por él por donde llega la sala entera la primera vez.
     memberPubkeys: () => {
       const r = activeRoom.value
       if (!r) return []
-      return r.members.map((m) => m.publickey).filter((pk) => pk && pk !== myPubkey.value)
+      const pks = r.members.map((m) => m.publickey)
+      if (r.hostPubkey) pks.push(r.hostPubkey)
+      return [...new Set(pks)].filter((pk) => pk && pk !== myPubkey.value)
     },
     // Todos los sobres firmados que conozco, para reenviarlos (gossip).
     allEnvelopes: () => {
@@ -103,6 +115,7 @@ function stopSync () {
   if (sync) { sync.stop(); sync = null }
   peerCount.value = 0
   syncStatus.value = 'offline'
+  unsealable.value = []
 }
 
 /** Re-difunde mi sobre (aporte o retract) en la sala activa. */
@@ -271,7 +284,7 @@ async function importMemberContrib (frag: string): Promise<string | null> {
 
 export function useRooms () {
   return {
-    rooms, activeRoom, activeRoomId, peerCount, syncStatus, myPubkey, myNick, contacts, unreachable, roomTab, roomShareOpen,
+    rooms, activeRoom, activeRoomId, peerCount, syncStatus, myPubkey, myNick, contacts, unreachable, unsealable, roomTab, roomShareOpen,
     initRooms, reloadRooms, loadIdentityInfo,
     openRoom, shareRoom, closeRoom, createRoom, joinByLink, leaveRoom, persist,
     startSync, stopSync, ensureSync, updateSyncFrag, broadcastEnvelope,

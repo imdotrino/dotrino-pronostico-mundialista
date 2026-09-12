@@ -1,4 +1,5 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
+import { vaultInit } from './_vault'
 
 // Pronóstico de la FECHA: popup diario con los partidos de hoy, sellado por
 // partido y sección "La fecha" para ver/editar lo no jugado.
@@ -13,26 +14,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 const FAKE_NOW = Date.parse('2026-06-15T13:00:00Z')
 const TZ = 'America/Guayaquil'
 
-const vaultInit = (nick: string) => `
-window.__TEST_VAULT_PROMISE__ = (async () => {
-  const kp = await crypto.subtle.generateKey({ name:'ECDSA', namedCurve:'P-256' }, true, ['sign','verify']);
-  const j = await crypto.subtle.exportKey('jwk', kp.publicKey);
-  const pub = JSON.stringify({ kty:'EC', crv:'P-256', x:j.x, y:j.y, ext:true });
-  const canon = (v) => (v===null||typeof v!=='object') ? JSON.stringify(v)
-    : Array.isArray(v) ? '['+v.map(canon).join(',')+']'
-    : '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canon(v[k])).join(',')+'}';
-  let nickname = ${JSON.stringify(nick)};
-  return {
-    me: { publickey: pub, nickname },
-    async signData(data){
-      const sig = new Uint8Array(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'}, kp.privateKey, new TextEncoder().encode(canon(data))));
-      let s=''; for(const b of sig) s+=String.fromCharCode(b);
-      return { signature: btoa(s), publickey: pub };
-    },
-    async listContacts(){ return []; },
-    async setMyNickname(a){ nickname = (a && a.nickname) || nickname; this.me.nickname = nickname; },
-  };
-})();`
+// El vault de prueba (firma + cifrado) vive en `_vault.ts`, uno para todos los specs.
 
 async function setupContext (context: BrowserContext) {
   await context.addInitScript(vaultInit('Probadora'))

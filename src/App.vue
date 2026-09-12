@@ -90,7 +90,7 @@ let inbox: RoomInbox | null = null
 const {
   rooms,
   initRooms, importRoomInvite, importMemberContrib, applyEnvelope, openRoom, closeRoom,
-  ensureSync, stopSync, activeRoom, peerCount, syncStatus, roomShareOpen, recontributeDaily,
+  ensureSync, stopSync, activeRoom, peerCount, syncStatus, unsealable, roomShareOpen, recontributeDaily,
 } = useRooms()
 
 // Ciclo de sincronización ligado a la sección: solo conectamos al proxy cuando
@@ -1353,6 +1353,13 @@ onUnmounted(() => {
       <span class="room-status" :class="syncStatus">
         {{ syncStatus === 'online' ? t('rooms.live', { n: peerCount }) : t('rooms.offline') }}
       </span>
+      <!-- A quien no se le puede sellar NO se le manda en claro, así que se queda fuera
+           de la sincronización. Se dice aquí: callarlo es dejar a alguien fuera de la
+           sala sin nada que mirar. -->
+      <span v-if="unsealable.length" class="room-status unsealable" data-testid="room-unsealable"
+            :title="t('rooms.unsealableHint')">
+        {{ t('rooms.unsealable', { n: unsealable.length }) }}
+      </span>
       <div class="bar-actions" data-testid="room-bar-actions">
         <button class="share-i" data-testid="room-bar-share" :title="t('common.share')" @click="roomShareOpen = true">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
@@ -2018,6 +2025,7 @@ onUnmounted(() => {
   border-radius: 6px; padding: 0.1rem 0.45rem; color: var(--muted);
 }
 .room-status.online { color: var(--green); border-color: var(--green); }
+.room-status.unsealable { color: var(--warn, #e0a01a); border-color: var(--warn, #e0a01a); }
 /* Un único margin-left:auto (en el grupo de acciones) empuja acciones + "volver"
    a la derecha; "volver" queda al borde, a la derecha del botón de compartir.
    (Dos autos repartirían el espacio y dejarían "volver" al centro.) */

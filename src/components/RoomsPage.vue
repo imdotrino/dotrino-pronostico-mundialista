@@ -271,8 +271,12 @@ async function inviteSelected () {
   inviting.value = true
   inviteStatus.value = t('rooms.inviting')
   try {
-    const sent = await sendRoomInvites([...selectedContacts.value], inviteUrl.value)
-    inviteStatus.value = t('rooms.invited', { n: sent })
+    const { sent, failed } = await sendRoomInvites([...selectedContacts.value], inviteUrl.value)
+    // Al que no se le pudo SELLAR no se le manda en claro, y se dice: callarlo dejaría
+    // a alguien fuera de la sala creyendo que le llegó la invitación.
+    inviteStatus.value = failed.length
+      ? t('rooms.invitedPartial', { n: sent, f: failed.length })
+      : t('rooms.invited', { n: sent })
     selectedContacts.value = new Set()
   } finally { inviting.value = false }
 }

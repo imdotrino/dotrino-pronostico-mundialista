@@ -2,9 +2,15 @@ import { test, expect } from '@playwright/test'
 
 // Verifica el motor COMÚN de acuses (createShareReceipts) en el navegador, con
 // proxy y controlador de notificaciones fakeados (sin tocar infra en vivo):
-//   - report(): el que ABRE encola un sobre __ccn identificado por sendByPubkey.
-//   - start(): el AUTOR, al recibir ese sobre, dispara notify(category, {...})
+//   - report(): el que ABRE encola un sobre __ccn identificado por sendSealed.
+//   - start(): el AUTOR, al recibir ese sobre SELLADO, dispara notify(category, {...})
 //     con el enlace en data.url para re-ver el contenido.
+//
+// El acuse va sellado desde @dotrino/notifications 0.4.0 (CONVENCIONES §4.1): lleva la
+// URL del contenido, su nombre y el apodo de quien lo abrió, y el proxio no cifra. Aquí
+// el transporte es de mentira, así que lo que se comprueba es el CONTRATO — que se manda
+// por `sendSealed` y que sin la marca `sealed` no entra. El sellado de verdad, mirando el
+// cable, está en `sellado.spec.ts` y en la suite del propio paquete.
 
 test('acuse de apertura: report envía sobre y start dispara notificación con el link', async ({ page }) => {
   await page.goto('/')
@@ -16,15 +22,16 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
       start: () => void
     } }
 
-    // Proxy falso: captura sendByPubkey y el handler de 'message'.
-    let onMessage: ((from: string, payload: unknown) => void) | null = null
+    // Proxy falso: captura sendSealed y el handler de 'message'. NO expone
+    // `sendByPubkey`: si el motor cayera al camino en claro, esto reventaría.
+    let onMessage: ((from: string, payload: unknown, meta?: unknown) => void) | null = null
     const sent: Array<{ pk: unknown; payload: unknown }> = []
     const fakeProxy = {
-      on: (ev: string, fn: (from: string, payload: unknown) => void) => {
+      on: (ev: string, fn: (from: string, payload: unknown, meta?: unknown) => void) => {
         if (ev === 'message') onMessage = fn
         return () => { onMessage = null }
       },
-      sendByPubkey: (pk: unknown, payload: unknown) => { sent.push({ pk, payload }) },
+      sendSealed: async (pk: unknown, payload: unknown) => { sent.push({ pk, payload }) },
     }
 
     // Controlador de notificaciones falso: captura notify().
@@ -52,12 +59,16 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
     })
     const reported = await openerReceipts.report({ toPubkey: 'PK_A', url, name: 'Mi pronóstico' })
 
-    // Simula la entrega del sobre al autor por el proxy.
+    // Simula la entrega al autor. Primero SIN sellar: no puede entrar.
     const env = sent[0]?.payload
-    if (onMessage) (onMessage as (f: string, p: unknown) => void)('tok', env)
+    const entrega = onMessage as ((f: string, p: unknown, m?: unknown) => void) | null
+    if (entrega) entrega('tok', env, { sealed: false })
+    const avisosTrasClaro = notifyCalls.length
+    if (entrega) entrega('tok', env, { sealed: true })
 
     return {
       reported,
+      avisosTrasClaro,
       sentTo: sent[0]?.pk,
       env,
       notifyCount: notifyCalls.length,
@@ -67,6 +78,8 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
 
   expect(r.reported).toBe(true)
   expect(r.sentTo).toBe('PK_A')
+  // Sellar solo de salida no serviría: lo que llega en claro se descarta.
+  expect(r.avisosTrasClaro).toBe(0)
   // Sobre estándar identificado.
   const env = r.env as Record<string, unknown>
   expect(env.__ccn).toBe(1)

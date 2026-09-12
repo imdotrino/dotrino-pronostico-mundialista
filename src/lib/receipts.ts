@@ -9,7 +9,11 @@
 //   handler de hashchange de App.vue lo re-importa).
 //
 // El contenido NO viaja por el push (política del ecosistema): el push solo
-// "timbra"; el contenido baja por la cola cifrada del proxy al reconectar.
+// "timbra"; el acuse baja por la cola del proxy al reconectar.
+//
+// EL ACUSE VA SELLADO (@dotrino/notifications >= 0.4.0, CONVENCIONES §4.1). Lleva el
+// enlace del pronóstico, su nombre y el apodo de quien lo abrió: iba en claro, y el
+// proxio no cifra. Si no se puede sellar no se manda — y se dice con su `code`.
 
 import { createShareReceipts, type ShareReceipts } from '@dotrino/notifications'
 import { ensureConnected, getProxyClient } from './connection'
@@ -36,8 +40,10 @@ function receipts (): ShareReceipts {
  * conexión al proxy + identify (para que el proxy nos enrute por pubkey).
  */
 export async function startReceipts (): Promise<void> {
-  await ensureConnected()
+  // Escuchar ANTES de conectar: la cola del proxio se drena al identificarse, y un acuse
+  // que llevaba horas esperando se perdería por engancharse un instante tarde.
   receipts().start()
+  await ensureConnected()
 }
 
 /**
@@ -47,5 +53,13 @@ export async function startReceipts (): Promise<void> {
 export async function reportOpen (toPubkey: string, url: string, name?: string): Promise<void> {
   if (!toPubkey || !url) return
   await ensureConnected()
-  try { await receipts().report({ toPubkey, url, name }) } catch { /* best-effort */ }
+  try {
+    await receipts().report({ toPubkey, url, name })
+  } catch (e: any) {
+    // No se traga: un acuse que no sale es normal (el autor puede no tener llave de
+    // cifrado anunciada todavía), pero tiene que poder buscarse por su `code` — con la
+    // frase no, que es lo que convierte «no tengo su llave» y «se cayó la red» en el
+    // mismo misterio.
+    console.warn('acuse de apertura no enviado (' + (e?.code || 'sin code') + '): no se manda en claro')
+  }
 }
