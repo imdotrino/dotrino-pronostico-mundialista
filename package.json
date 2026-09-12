@@ -22,7 +22,7 @@
     "@dotrino/proxy-client": "0.22.0",
     "@dotrino/reputation": "0.11.0",
     "@dotrino/share": "0.3.0",
-    "@dotrino/store": "0.7.0",
+    "@dotrino/store": "0.8.0",
     "@dotrino/topbar": "0.9.1",
     "@dotrino/tutorial": "0.2.0",
     "html2canvas": "^1.4.1",
@@ -48,5 +48,8 @@
     "vite-plugin-pwa": "^1.2.0",
     "vue-eslint-parser": "^9.4.3",
     "vue-tsc": "^3.1.0"
+  },
+  "overrides": {
+    "@dotrino/store": "0.8.0"
   }
 }
