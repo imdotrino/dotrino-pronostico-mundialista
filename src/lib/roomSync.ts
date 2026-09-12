@@ -16,10 +16,11 @@
 // para lo que siempre fue, presencia (cuánta gente hay mirando), y ahí no hay nada
 // que ocultar: es público por diseño y §4.1 lo exime.
 //
-// Lo que eso cuesta, dicho en voz alta: dos miembros que solo conocen al creador y
-// no han aportado nada todavía ya no se descubren entre sí por estar a la vez en el
-// canal. Convergen igual en cuanto uno aporte o el creador abra la app, porque el
-// reenvío (gossip) sigue pasando por quien sí se conoce.
+// Y DE QUIÉN ES CADA TOKEN LO DICE EL SALUDO (`helloTo`, pilar 0.22.0+): una trama de
+// control del transporte que solo lleva una llave PÚBLICA, la misma que el proxio ya
+// tiene atada a esa conexión desde el `identify`. Con eso se recupera lo único que se
+// perdía al dejar de mandar por token: que dos miembros que aún no se conocen se
+// descubran por estar a la vez en el canal, sin esperar a que el creador abra la app.
 //
 // Los mensajes son objetos JSON con un campo `type`:
 //   { type:'ROOM_PREDICTION', roomId, env }   pronóstico firmado de un miembro
@@ -85,6 +86,9 @@ export class RoomSync {
       await c.publish(this.channelName)
       const tokens = await c.list(this.channelName)
       for (const tk of tokens) if (tk !== c.token) this.peers.add(tk)
+      // Saludar a los que ya estaban: quien contesta dice de quién es su token, y a
+      // partir de ahí ya hay una identidad a la que sellarle.
+      try { c.helloTo([...this.peers]) } catch { /* sin identify todavía */ }
       this.handlers.onStatus?.('online')
       this.emitCount()
       void this.relayAll()        // les paso TODO lo que conozco (gossip)
@@ -221,6 +225,13 @@ export class RoomSync {
       if (channel !== this.channelName || token === c.token) return
       this.peers.add(token)
       this.emitCount()
+      try { c.helloTo(token) } catch { /* sin identify todavía */ }
+    }))
+    // El saludo contestado: ya se sabe QUIÉN está en la sala, no solo cuántos. Se le
+    // manda lo que sé — `relayAll` calla solo si no tengo nada nuevo que contarle.
+    this.offFns.push(c.on('peer_identity', (token: string, publickey: string) => {
+      if (!this.peers.has(token) || !publickey) return
+      void this.relayAll([publickey])
     }))
     const drop = (channel: string, token: string) => {
       if (channel && channel !== this.channelName) return

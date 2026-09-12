@@ -202,6 +202,54 @@ test.describe('el proxio no ve nada del usuario', () => {
     await A.ctx.close(); await B2.ctx.close()
   })
 
+  test('dos desconocidos de la misma sala se descubren por el SALUDO y se sellan', async ({ browser }) => {
+    // Sin creador y sin miembros conocidos: lo único que comparten es el canal, que solo
+    // lista TOKENS. De quién es cada uno lo dice el saludo del transporte (`helloTo`),
+    // que solo lleva una llave pública — la misma que el proxio ya tiene atada a esa
+    // conexión. A partir de ahí ya hay una identidad a la que sellarle.
+    const room = ROOM + '-hola'
+    const A = await abrir(browser, 'ana', await llaves())
+    const B = await abrir(browser, 'beto', await llaves())
+
+    const arranca = (p: { page: Page }, nick: string) => p.page.evaluate(async ({ room, nick }) => {
+      const { RoomSync } = await import('/src/lib/roomSync.ts')
+      const { buildMemberEnvelope } = await import('/src/lib/room.ts')
+      const { defaultPrediction } = await import('/src/lib/prediction.ts')
+      const { encodePrediction } = await import('/src/lib/codec.ts')
+      const { buildShareUrl } = await import('/src/lib/share.ts')
+      const { url } = await buildShareUrl(encodePrediction(defaultPrediction()), 'P de ' + nick)
+      const env = await buildMemberEnvelope(room, url.split('#')[1] as string, Date.now())
+      const w = window as any
+      w.__R__ = []
+      w.__sync = new RoomSync(room, env, {
+        onPrediction: (e: string) => w.__R__.push(e),
+        memberPubkeys: () => [],        // NADIE conocido: ni miembros ni creador
+        allEnvelopes: () => [env],
+      })
+      await w.__sync.start()
+      return env
+    }, { room, nick })
+
+    await conectar(A.page); await conectar(B.page)
+    const envA = await arranca(A, 'ana')
+    const envB = await arranca(B, 'beto')
+
+    await expect.poll(() => A.page.evaluate(() => (window as any).__R__.length), { timeout: 30000 }).toBeGreaterThan(0)
+    await expect.poll(() => B.page.evaluate(() => (window as any).__R__.length), { timeout: 30000 }).toBeGreaterThan(0)
+    expect(await A.page.evaluate(() => (window as any).__R__)).toContain(envB)
+    expect(await B.page.evaluate(() => (window as any).__R__)).toContain(envA)
+
+    // El saludo lleva una llave pública y nada más: el sobre sigue sin asomar.
+    for (const [quien, page] of [['A', A.page], ['B', B.page]] as const) {
+      const texto = await cable(page)
+      expect(texto, quien).not.toContain(envA)
+      expect(texto, quien).not.toContain(envB)
+      expect(texto, quien).not.toContain('ROOM_PREDICTION')
+    }
+
+    await A.ctx.close(); await B.ctx.close()
+  })
+
   test('a quien NUNCA anunció llave no se le manda nada — y se dice cuál es el fallo', async ({ browser }) => {
     const kA = await llaves()
     const kNadie = await llaves()
