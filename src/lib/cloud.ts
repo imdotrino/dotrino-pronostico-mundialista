@@ -11,6 +11,7 @@
 // thread (`predictions`, `rooms`), con `id` del registro y `ts = updatedAt`.
 
 import { Store } from '@dotrino/store'
+import { getIdentity } from './identity'
 
 export const THREAD_PREDICTIONS = 'predictions'
 export const THREAD_ROOMS = 'rooms'
@@ -26,8 +27,16 @@ const CLOUD_DISABLED = (import.meta.env.VITE_DISABLE_CLOUD as string | undefined
 export function getCloudStore (): Promise<InstanceType<typeof Store> | null> {
   if (CLOUD_DISABLED) return Promise.resolve(null)
   if (!_storePromise) {
-    _storePromise = Store.connect()
-      .then((s) => s)
+    // Atado al PERFIL (respaldo en la bóveda, sin mezclar cuentas). Hasta 2026-09-30 conectaba
+    // sin identidad y todo quedaba en el espacio común del navegador; `adoptCommon` lo trae al
+    // perfil una vez, sin borrar el original.
+    _storePromise = getIdentity()
+      .then((identity) => {
+        if (!identity) throw Object.assign(new Error('identity not available'), { code: 'no-identity' })
+        // `currentProfile()` existe en el cliente de identity pero sus tipos no lo declaran
+        // todavía (pendiente en @dotrino/identity): de ahí el cast.
+        return Store.connect({ identity: identity as unknown as NonNullable<Parameters<typeof Store.connect>[0]>['identity'], adoptCommon: [THREAD_PREDICTIONS, THREAD_ROOMS] })
+      })
       .catch((e) => { console.warn('Store del ecosistema inalcanzable:', e); return null })
   }
   return _storePromise

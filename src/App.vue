@@ -677,6 +677,13 @@ watchEffect(() => {
   tb.reputation = reputationInst.value ?? null
 })
 
+// El estado del respaldo en la bóveda, a la vista en el botón de perfil (topbar ≥ 0.13).
+watchEffect(() => {
+  const tb = topbarRef.value as (HTMLElement & { store?: unknown }) | null
+  if (!tb || !identityInst.value) return
+  import('./lib/cloud').then((m) => m.getCloudStore()).then((s) => { if (s) tb.store = s })
+})
+
 onMounted(async () => {
   identityInst.value = await getIdentity()
   if (identityInst.value) reputationInst.value = await getReputation()
