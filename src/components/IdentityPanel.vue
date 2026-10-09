@@ -5,12 +5,12 @@ import type { PeerInfo } from '@dotrino/identity'
 import { getIdentity, type IdentityInstance } from '../lib/identity'
 import { getReputation } from '../lib/reputation'
 import { buildTrustMap, computeDerivedRating, shortKey } from '../lib/rating'
-import { resolveTokenToIdentity, ProxyTokenError } from '../lib/proxy'
+import { resolveCodeToIdentity, ProxyTokenError } from '../lib/proxy'
 import { useNotifications } from '../lib/notifications'
 import { createVaultProfileProvider } from '@dotrino/profile'
 import '@dotrino/profile'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 
 const notif = useNotifications()
 async function toggleNotif () {
@@ -180,9 +180,9 @@ async function addContact () {
   adding.value = true
   addStatus.value = t('identity.searchingToken')
   try {
-    // Resolvemos el token → identidad real (clave pública) vía el proxy:
-    // mandamos un challenge firmado y verificamos la respuesta del peer.
-    const resolved = await resolveTokenToIdentity(token, id.value)
+    // La cita → identidad real, por el pilar: el proxio dice de quién es y la llave de
+    // cifrado se verifica contra esa pubkey.
+    const resolved = await resolveCodeToIdentity(token)
 
     if (resolved.publickey === id.value.me?.publickey) {
       addError.value = t('identity.tokenIsYours')
@@ -193,9 +193,8 @@ async function addContact () {
     await id.value.addContact({
       publickey: resolved.publickey,
       // Preferimos el apodo que escribió el usuario; si no, el que anunció el peer.
-      nickname: newNick.value.trim() || resolved.nickname || undefined,
-      encryptionPubkey: resolved.encryptionPubkey || undefined,
-      lastToken: token,
+      nickname: newNick.value.trim() || undefined,
+      encryptionPubkey: resolved.encryptionPubkey,
     })
     newToken.value = ''
     newNick.value = ''
@@ -205,7 +204,10 @@ async function addContact () {
   } catch (e) {
     addStatus.value = ''
     if (e instanceof ProxyTokenError) {
-      addError.value = e.message
+      // Por `code`, nunca por la frase: cada caso se arregla de una forma distinta.
+      const key = `identity.codeError.${e.code}`
+      addError.value = te(key) ? t(key) : t('identity.addError')
+      console.warn(`contact by code failed: ${e.code}`)
     } else {
       addError.value = t('identity.addError')
     }
