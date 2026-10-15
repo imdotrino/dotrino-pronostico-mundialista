@@ -27,6 +27,7 @@ import { decodePrediction, encodePrediction } from './codec'
 import { getIdentity } from './identity'
 import { requestSeal, verifySeal, sha256Base64url } from './signer'
 import { genId, type SavedPrediction, type MatchSealRecord } from './store'
+import { b64urlToBytes, bytesToB64url } from './bytes'
 
 // Puntos del juego de la fecha (independientes del juego clásico): acertar el
 // 1X2 del partido, bono por marcador exacto y, en eliminatorias, quién avanza.
@@ -235,17 +236,6 @@ async function matchSealHash (id: number, r: MatchResult, jwkString: string): Pr
   } catch { return null }
 }
 
-function b64urlToBytes (s: string): Uint8Array {
-  const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'))
-  const out = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
-  return out
-}
-function bytesToB64url (bytes: Uint8Array): string {
-  let bin = ''
-  for (const b of bytes) bin += String.fromCharCode(b)
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
 
 /** Pide al TSA el sello de un pick PROPIO. Null si no hay identidad/sellador. */
 export async function sealMatchPick (id: number, r: MatchResult): Promise<MatchSealRecord | null> {

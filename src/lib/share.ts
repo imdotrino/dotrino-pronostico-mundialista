@@ -34,20 +34,8 @@ const PAYLOAD_VERSION_SEALED = 2
 
 // ---- base64 / base64url ----------------------------------------------------
 
-export function b64ToBytes (b64: string): Uint8Array {
-  const bin = atob(b64)
-  const out = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
-  return out
-}
-export function b64urlToBytes (s: string): Uint8Array {
-  return b64ToBytes(s.replace(/-/g, '+').replace(/_/g, '/'))
-}
-export function bytesToB64url (bytes: Uint8Array): string {
-  let bin = ''
-  for (const b of bytes) bin += String.fromCharCode(b)
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
+export { b64ToBytes, b64urlToBytes, bytesToB64url } from './bytes'
+import { b64ToBytes, b64urlToBytes, bytesToB64url } from './bytes'
 
 // El vault firma canonicalStringify(data); para un string eso es
 // JSON.stringify(string). Lo replicamos para verificar.

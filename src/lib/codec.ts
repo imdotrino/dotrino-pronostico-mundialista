@@ -24,6 +24,7 @@ import { GROUPS } from './teams'
 import { R32, R16, QF, SF, THIRD_PLACE, FINAL } from './bracket'
 import { defaultPrediction, resolveMatches, type Prediction } from './prediction'
 import type { GameMode, Scope, MatchResult } from './standings'
+import { bytesToB64url, b64urlToBytes } from './bytes'
 
 const VERSION_UNSCOPED = 3 // 'all' → formato clásico (compatible con apps viejas)
 const VERSION_SCOPED = 4 // 'groups'/'bracket' → añade 2 bits de scope tras el modo
@@ -114,19 +115,6 @@ class BitReader {
 
 // ---- base64url -------------------------------------------------------------
 
-function bytesToB64url (bytes: Uint8Array): string {
-  let bin = ''
-  for (const b of bytes) bin += String.fromCharCode(b)
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
-
-function b64urlToBytes (s: string): Uint8Array {
-  const b64 = s.replace(/-/g, '+').replace(/_/g, '/')
-  const bin = atob(b64)
-  const bytes = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
-  return bytes
-}
 
 // ---- API -------------------------------------------------------------------
 

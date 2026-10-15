@@ -9,6 +9,7 @@
 // el par { hash, ts }, y como el autor no controla esa clave, no puede falsear
 // la fecha. El sellador solo ve el hash, nunca el pronóstico.
 
+import { canonicalStringify, b64ToBytes, bytesToB64url } from './bytes'
 export const SIGNER_URL = 'https://signer.dotrino.com'
 
 // Pubkey de producción del sellador, PINEADA: la confianza no depende de la
@@ -23,31 +24,12 @@ export interface PredictionSeal {
   sig: Uint8Array
 }
 
-// Serialización canónica idéntica a vault / proxy / servidor del signer.
-function canonicalStringify (v: unknown): string {
-  if (v === null || typeof v !== 'object') return JSON.stringify(v)
-  if (Array.isArray(v)) return '[' + v.map(canonicalStringify).join(',') + ']'
-  const ks = Object.keys(v as Record<string, unknown>).sort()
-  return '{' + ks.map((k) => JSON.stringify(k) + ':' + canonicalStringify((v as Record<string, unknown>)[k])).join(',') + '}'
-}
 
-function bufToB64url (buf: ArrayBuffer | Uint8Array): string {
-  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf)
-  let bin = ''
-  for (const b of bytes) bin += String.fromCharCode(b)
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
-function b64ToBytes (b64: string): Uint8Array {
-  const bin = atob(b64.replace(/-/g, '+').replace(/_/g, '/'))
-  const out = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
-  return out
-}
 
 /** SHA-256 de bytes, en base64url (formato que espera el sellador). */
 export async function sha256Base64url (bytes: Uint8Array): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', bytes as BufferSource)
-  return bufToB64url(digest)
+  return bytesToB64url(digest)
 }
 
 // Cache en memoria por hash: evita pedir un sello nuevo en cada render de QR /

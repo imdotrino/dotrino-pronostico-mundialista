@@ -19,6 +19,7 @@ import { R32, R16, QF, SF, THIRD_PLACE, FINAL } from './bracket'
 import { encodePrediction } from './codec'
 import { kickoffUTC } from './schedule'
 import type { IdentityInstance } from './identity'
+import { canonicalStringify, b64ToBytes } from './bytes'
 
 // URL del relay y su pubkey de SERVICIO, PINEADA (la confianza no depende de la
 // pubkey que venga en el feed, sino de esta clave conocida — igual que el signer).
@@ -51,18 +52,6 @@ export interface SignedFeed { data: Feed; signature: string }
 
 // --- cripto (idéntico al resto del ecosistema: canónico + WebCrypto verify) ---
 
-function canonicalStringify (v: unknown): string {
-  if (v === null || typeof v !== 'object') return JSON.stringify(v)
-  if (Array.isArray(v)) return '[' + v.map(canonicalStringify).join(',') + ']'
-  const ks = Object.keys(v as Record<string, unknown>).sort()
-  return '{' + ks.map((k) => JSON.stringify(k) + ':' + canonicalStringify((v as Record<string, unknown>)[k])).join(',') + '}'
-}
-function b64ToBytes (b64: string): Uint8Array {
-  const bin = atob(b64.replace(/-/g, '+').replace(/_/g, '/'))
-  const out = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
-  return out
-}
 
 /** Verifica la firma del feed contra la pubkey PINEADA del relay. */
 export async function verifyFeed (sf: SignedFeed): Promise<boolean> {

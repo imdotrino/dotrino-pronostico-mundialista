@@ -45,9 +45,9 @@ const controller = createNotifications({
   categories: [
     {
       key: 'shareOpened',
-      label: { es: 'Aperturas de lo que compartí', en: 'Opens of what I shared' },
+      label: { es: 'Aperturas de lo que compartiste', en: 'Opens of what I shared' },
       hint: {
-        es: 'Avisame cuando alguien abre un pronóstico que compartí.',
+        es: 'Avísame cuando alguien abra un pronóstico que compartiste.',
         en: 'Notify me when someone opens a prediction I shared.',
       },
     },

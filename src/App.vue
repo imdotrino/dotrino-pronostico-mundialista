@@ -41,7 +41,7 @@ import RoomShareModal from './components/RoomShareModal.vue'
 import PrintView from './components/PrintView.vue'
 import Sidebar from './components/Sidebar.vue'
 import ScoringInfo from './components/ScoringInfo.vue'
-import QRCode from 'qrcode'
+import { qrSvg } from '@dotrino/qr/svg'
 import IdentityPanel from './components/IdentityPanel.vue'
 import RoomsPage from './components/RoomsPage.vue'
 import MatchdayPage from './components/MatchdayPage.vue'
@@ -535,6 +535,8 @@ function tryPdf (id: string) { shareGuard(id, pdfEntry) }
 
 // Datos para la vista de impresión (PrintView).
 const printQr = ref('')
+// QR del pilar @dotrino/qr (SVG, generado aquí): un SVG escala al imprimir sin perder nitidez.
+const qrDataUrl = (url: string) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(qrSvg(url, { margin: 1 }))
 const printPred = ref<Prediction | null>(null)
 const printTitle = ref('')
 const printAuthor = ref<string | undefined>(undefined)
@@ -569,7 +571,7 @@ async function handlePrint (url: string) {
   if (!printPred.value) return
   printTitle.value = entry?.name || activeEntry.value?.name || t('store.defaultTitle')
   printAuthor.value = entry?.author?.nickname ?? activeEntry.value?.author?.nickname
-  printQr.value = await QRCode.toDataURL(url, { margin: 1, width: 512 })
+  printQr.value = qrDataUrl(url)
   shareOpen.value = false
   await nextTick()
   window.print()
@@ -592,7 +594,7 @@ async function downloadPdf (url: string) {
   printTitle.value = entry?.name || activeEntry.value?.name || t('store.defaultTitle')
   printAuthor.value = entry?.author?.nickname ?? activeEntry.value?.author?.nickname
   try {
-    printQr.value = await QRCode.toDataURL(url, { margin: 1, width: 512 })
+    printQr.value = qrDataUrl(url)
     shareOpen.value = false
     pdfCapturing.value = true
     await nextTick()
