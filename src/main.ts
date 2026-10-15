@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import '@dotrino/theme/theme.css'
 import './style.css'
 import App from './App.vue'
 // Barra superior estándar del ecosistema (CONVENCIONES §5): trae dentro la

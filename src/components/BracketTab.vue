@@ -325,7 +325,7 @@ function connectorsForCol (nums: number[]): Connector[] {
    que el trofeo del campeón, para que se note que falta elegir el ganador. */
 .medal { display: block; font-size: 1.2rem; text-align: center; filter: grayscale(1) opacity(0.4); transition: filter 0.3s; margin-bottom: 0.1rem; }
 .medal.won { filter: none; text-shadow: 0 0 14px rgba(205, 127, 50, 0.6); }
-.bronze-name { color: #cd7f32; font-weight: 800; font-size: 0.74rem; text-align: center; margin-top: 0.2rem; }
+.bronze-name { color: var(--dt-busy); font-weight: 800; font-size: 0.74rem; text-align: center; margin-top: 0.2rem; }
 
 @media (min-width: 760px) {
   /* Mismo reparto flexible, solo con más aire y tipografías mayores. */

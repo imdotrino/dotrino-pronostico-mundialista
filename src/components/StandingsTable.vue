@@ -84,8 +84,8 @@ const POS = ['1º', '2º', '3º', '4º']
   border-top: 1px solid var(--line);
   background: var(--panel);
 }
-.team-row.qualifies { background: rgba(65, 180, 255, 0.14); }
-.team-row.third { background: rgba(255, 207, 63, 0.1); }
+.team-row.qualifies { background: color-mix(in srgb, var(--dt-accent) 14%, transparent); }
+.team-row.third { background: color-mix(in srgb, var(--dt-busy) 10%, transparent); }
 .pos { width: 1.6rem; font-size: 0.8rem; color: var(--muted); font-weight: 700; }
 .flag { font-size: 1.3rem; line-height: 1; }
 .name { flex: 1; font-size: 0.95rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

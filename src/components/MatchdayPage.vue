@@ -291,7 +291,7 @@ const ptsOf = (f: Fixture): number => score.value.per.get(f.id)?.pts ?? 0
 .head-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
 .head h2 { color: var(--azure); font-size: 1.15rem; }
 .share {
-  background: var(--azure); color: #042038; border: none; border-radius: 50px;
+  background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 50px;
   padding: 0.4rem 1rem; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 0.82rem;
 }
 .desc { color: var(--muted); font-size: 0.82rem; margin-top: 0.4rem; }
@@ -307,10 +307,10 @@ const ptsOf = (f: Fixture): number => score.value.per.get(f.id)?.pts ?? 0
 
 .day-h { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 1rem 0 0.5rem; display: flex; align-items: center; gap: 0.45rem; }
 .today .day-h { color: var(--azure); }
-.today-tag { background: var(--azure); color: #042038; border-radius: 6px; padding: 0.05rem 0.4rem; font-weight: 800; font-size: 0.68rem; }
+.today-tag { background: var(--azure); color: var(--dt-accent-ink); border-radius: 6px; padding: 0.05rem 0.4rem; font-weight: 800; font-size: 0.68rem; }
 .live-tag { color: var(--green); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.04em; }
 .row { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 0.6rem 0.75rem; margin-bottom: 0.5rem; }
-.today .row { border-color: rgba(65, 180, 255, 0.45); }
+.today .row { border-color: color-mix(in srgb, var(--dt-accent) 45%, transparent); }
 .meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem; }
 .duel { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
 .team { display: inline-flex; align-items: center; gap: 0.35rem; min-width: 0; }
@@ -327,7 +327,7 @@ const ptsOf = (f: Fixture): number => score.value.per.get(f.id)?.pts ?? 0
 .adv { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.45rem; flex-wrap: wrap; }
 .adv-q { font-size: 0.72rem; color: var(--gold); font-weight: 700; }
 .adv button { background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 0.2rem 0.55rem; cursor: pointer; font-weight: 700; font-size: 0.76rem; font-family: inherit; }
-.adv button.on { background: var(--azure); color: #042038; border-color: var(--azure); }
+.adv button.on { background: var(--azure); color: var(--dt-accent-ink); border-color: var(--azure); }
 
 .seal { font-size: 0.7rem; margin-top: 0.4rem; color: var(--muted); }
 .seal.sealed { color: var(--green); }
@@ -339,6 +339,6 @@ const ptsOf = (f: Fixture): number => score.value.per.get(f.id)?.pts ?? 0
 .of { color: var(--azure); font-weight: 800; font-size: 1rem; }
 .mine { color: var(--muted); font-size: 0.72rem; }
 .mine.none { font-style: italic; }
-.pts { background: rgba(78, 222, 128, 0.18); color: var(--green); border-radius: 6px; padding: 0.05rem 0.45rem; font-weight: 800; font-size: 0.76rem; }
-.pts.zero { background: rgba(255, 255, 255, 0.06); color: var(--muted); }
+.pts { background: color-mix(in srgb, var(--dt-ok) 18%, transparent); color: var(--green); border-radius: 6px; padding: 0.05rem 0.45rem; font-weight: 800; font-size: 0.76rem; }
+.pts.zero { background: color-mix(in srgb, var(--dt-text) 6%, transparent); color: var(--muted); }
 </style>

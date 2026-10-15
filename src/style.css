@@ -1,50 +1,40 @@
 :root {
-  /* "Estadio nocturno bajo reflectores": azul medianoche + azul eléctrico + oro */
-  --pitch-0: #060e20;
-  --pitch-1: #0a1730;
+  /* Colores y fuentes del ecosistema (@dotrino/theme, CONVENCIONES §5), con los nombres de
+     siempre para que los componentes no cambien. Claro u oscuro lo elige el tema. */
+  --pitch-0: var(--dt-bg);
+  --pitch-1: var(--dt-bg-2);
   --bg: var(--pitch-0);
   --bg-2: var(--pitch-1);
-  --panel: #0f2143;
-  --panel-2: #173159;
-  --line: rgba(91, 173, 255, 0.18);
-  --line-soft: rgba(233, 242, 255, 0.08);
+  --panel: var(--dt-surface);
+  --panel-2: var(--dt-surface-2);
+  --line: var(--dt-line);
+  --line-soft: var(--dt-line-soft);
 
-  --azure: #41b4ff;
-  --azure-dim: #1e6fd0;
+  --azure: var(--dt-accent);
+  --azure-dim: var(--dt-accent-press);
   --lime: var(--azure);
   --lime-dim: var(--azure-dim);
   --green: var(--azure);
-  --green-d: #102a52;
-  --gold: #ffcf3f;
-  /* "Incompleto / falta elegir": celeste brillante que contrasta con el azul
-     oscuro del panel y con las líneas tenues. */
-  --pending: #5fd0ff;
+  --green-d: var(--dt-accent-soft);
+  --gold: var(--dt-gold);
+  /* "Incompleto / falta elegir": que se distinga del texto y de las líneas. */
+  --pending: var(--dt-violet);
 
-  --text: #eaf2ff;
-  --chalk: #eaf2ff;
-  --muted: rgba(234, 242, 255, 0.55);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --text: var(--dt-text);
+  --chalk: var(--dt-text);
+  --muted: var(--dt-text-dim);
+  --shadow: var(--dt-shadow);
 
-  --font-display: 'Anton', 'Hanken Grotesk', sans-serif;
-  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-display: var(--dt-font-brand);
+  --font-body: var(--dt-font);
 
   font-family: var(--font-body);
-  color-scheme: dark;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   background-color: var(--pitch-0);
-  /* glow de reflector arriba + rayas de cancha muy sutiles */
-  background-image:
-    radial-gradient(120% 80% at 50% -10%, rgba(65, 180, 255, 0.16), transparent 60%),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.02) 0 64px,
-      transparent 64px 128px
-    );
-  background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;

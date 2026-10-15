@@ -143,24 +143,6 @@ function bindProfile (el: any) {
   ensureProvider().then((p) => { if (p) el.provider = p })
 }
 function onProfileRate () { repByPubkey.value = {}; loadReps() }
-// Tema oscuro del pronosticador (azure/gold sobre panel).
-const profileTheme: Record<string, string> = {
-  '--ccp-bg': 'var(--panel)',
-  '--ccp-bg-2': 'var(--panel-2)',
-  '--ccp-bg-3': 'var(--panel-2)',
-  '--ccp-bg-4': 'rgba(233, 242, 255, 0.18)',
-  '--ccp-border': 'var(--line)',
-  '--ccp-text': 'var(--text)',
-  '--ccp-muted': 'var(--muted)',
-  '--ccp-accent': 'var(--azure)',
-  '--ccp-accent-2': 'var(--azure-dim)',
-  '--ccp-gold': 'var(--gold)',
-  '--ccp-derived': 'var(--gold)',
-  '--ccp-online': 'var(--azure)',
-  '--ccp-affinity': '#ff7aa8',
-  '--ccp-input-bg': 'var(--panel-2)',
-  '--ccp-radius': '12px',
-}
 </script>
 
 <template>
@@ -214,7 +196,6 @@ const profileTheme: Record<string, string> = {
       :ref="bindProfile"
       modal
       mode="edit"
-      :style="profileTheme"
       :lang="locale"
       :pubkey="profilePk"
       :name="profileName"
@@ -239,19 +220,19 @@ const profileTheme: Record<string, string> = {
 .nm { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
 .nm.clickable { cursor: pointer; }
 .nm.clickable:hover { color: var(--azure); text-decoration: underline; }
-.you { font-size: 0.65rem; background: var(--azure); color: #042038; border-radius: 5px; padding: 0 0.3rem; font-weight: 800; }
+.you { font-size: 0.65rem; background: var(--azure); color: var(--dt-accent-ink); border-radius: 5px; padding: 0 0.3rem; font-weight: 800; }
 .vrow { display: flex; align-items: center; gap: 0.35rem; margin-top: 0.1rem; flex-wrap: wrap; }
-.badge { font-size: 0.7rem; color: #e0a; }
+.badge { font-size: 0.7rem; color: var(--dt-violet); }
 .via { font-size: 0.66rem; color: var(--azure); border: 1px solid var(--azure); border-radius: 4px; padding: 0 0.3rem; white-space: nowrap; }
 .pname { font-size: 0.78rem; color: var(--muted); font-weight: 400; }
 .seal { font-size: 0.7rem; cursor: help; }
 .seal.bad, .seal.late { color: var(--gold); }
 .seal.none { color: var(--muted); opacity: 0.6; }
-.rm-fwd { background: transparent; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 5px; padding: 0 0.4rem; font-size: 0.66rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+.rm-fwd { background: transparent; color: var(--dt-error); border: 1px solid var(--dt-error); border-radius: 5px; padding: 0 0.4rem; font-size: 0.66rem; font-weight: 700; cursor: pointer; font-family: inherit; }
 .badge.ok { color: var(--green); }
 .mono { font-family: monospace; font-size: 0.66rem; color: var(--muted); }
 .rep { font-size: 0.66rem; font-weight: 700; color: var(--green); background: rgba(0,0,0,.18); border-radius: 4px; padding: 0 0.25rem; }
-.rep.afin { color: #ff7aa8; }
-.me { background: rgba(65, 180, 255, 0.06); }
+.rep.afin { color: var(--dt-error); }
+.me { background: color-mix(in srgb, var(--dt-accent) 6%, transparent); }
 .lock { opacity: 0.7; }
 </style>

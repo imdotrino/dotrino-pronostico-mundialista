@@ -72,8 +72,8 @@ const dragHandle = typeof window !== 'undefined' && window.matchMedia('(pointer:
 }
 .third-row.grab { cursor: grab; }
 .third-row.grab:active { cursor: grabbing; }
-.third-row.in { background: rgba(65, 180, 255, 0.14); }
-.third-row.out { background: rgba(231, 76, 60, 0.08); opacity: 0.7; }
+.third-row.in { background: color-mix(in srgb, var(--dt-accent) 14%, transparent); }
+.third-row.out { background: color-mix(in srgb, var(--dt-error) 8%, transparent); opacity: 0.7; }
 .rank { width: 1.5rem; text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--muted); }
 .flag { font-size: 1.3rem; }
 .name { flex: 1; font-size: 0.95rem; }

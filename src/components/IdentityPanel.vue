@@ -71,25 +71,6 @@ function bindProfile (el: any) {
   if (!el) return
   ensureProvider().then((p) => { if (p) el.provider = p })
 }
-// Tema oscuro del pronosticador (azure/gold sobre panel) para el Web Component.
-const profileTheme: Record<string, string> = {
-  '--ccp-bg': 'var(--panel)',
-  '--ccp-bg-2': 'var(--panel-2)',
-  '--ccp-bg-3': 'var(--panel-2)',
-  '--ccp-bg-4': 'rgba(233, 242, 255, 0.18)',
-  '--ccp-border': 'var(--line)',
-  '--ccp-text': 'var(--text)',
-  '--ccp-muted': 'var(--muted)',
-  '--ccp-accent': 'var(--azure)',
-  '--ccp-accent-2': 'var(--azure-dim)',
-  '--ccp-gold': 'var(--gold)',
-  '--ccp-derived': 'var(--gold)',
-  '--ccp-online': 'var(--azure)',
-  '--ccp-affinity': '#ff7aa8',
-  '--ccp-input-bg': 'var(--panel-2)',
-  '--ccp-radius': '12px',
-}
-
 // Perfil de un peer (contacto o ranking): tarjeta compartida en modo edición
 // (permite calificarlo). Al guardar, refrescamos para recomputar el ranking.
 const peerPk = ref<string | null>(null)
@@ -251,7 +232,6 @@ async function removeContact (pk: string) {
           :ref="bindProfile"
           mode="self"
           allow-edit
-          :style="profileTheme"
           :lang="locale"
           :pubkey="myPubkey"
           :name="myNick"
@@ -345,7 +325,6 @@ async function removeContact (pk: string) {
       :ref="bindProfile"
       modal
       mode="edit"
-      :style="profileTheme"
       :lang="locale"
       :pubkey="peerPk"
       :name="peerName"
@@ -384,7 +363,7 @@ h3 { color: var(--azure); margin-bottom: 0.8rem; }
 .add .token { font-family: monospace; text-transform: uppercase; letter-spacing: 0.18em; text-align: center; font-size: 1rem; }
 .add input + input { margin-top: 0.4rem; }
 .go {
-  background: var(--azure); color: #042038; border: none; border-radius: 8px;
+  background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 8px;
   padding: 0 0.9rem; font-weight: 800; cursor: pointer; white-space: nowrap;
 }
 .add .go { width: 100%; padding: 0.55rem; margin-top: 0.4rem; }
@@ -394,20 +373,20 @@ h3 { color: var(--azure); margin-bottom: 0.8rem; }
 .hint { font-size: 0.78rem; color: var(--muted); margin-top: 0.5rem; }
 .copy-key { margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.35rem; }
 .copy-key-btn {
-  align-self: flex-start; background: transparent; color: var(--azure, #41b4ff);
-  border: 1px solid var(--azure, #41b4ff); border-radius: 50px;
+  align-self: flex-start; background: transparent; color: var(--azure, var(--dt-accent));
+  border: 1px solid var(--azure, var(--dt-accent)); border-radius: 50px;
   padding: 0.35rem 0.85rem; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 0.78rem;
 }
-.copy-key-btn:hover { background: rgba(65, 180, 255, 0.16); }
+.copy-key-btn:hover { background: color-mix(in srgb, var(--dt-accent) 16%, transparent); }
 .copy-key-val {
   font-size: 0.66rem; color: var(--muted); word-break: break-all; line-height: 1.3;
-  background: rgba(255,255,255,0.04); border-radius: 8px; padding: 0.4rem 0.55rem;
+  background: color-mix(in srgb, var(--dt-text) 4%, transparent); border-radius: 8px; padding: 0.4rem 0.55rem;
 }
 .focus-note {
-  font-size: 0.8rem; color: var(--azure); background: rgba(65, 180, 255, 0.1);
+  font-size: 0.8rem; color: var(--azure); background: color-mix(in srgb, var(--dt-accent) 10%, transparent);
   border: 1px solid var(--azure); border-radius: 8px; padding: 0.5rem 0.7rem; margin-bottom: 0.7rem;
 }
-.err { color: #ff6b6b; font-size: 0.78rem; margin-top: 0.3rem; }
+.err { color: var(--dt-error); font-size: 0.78rem; margin-top: 0.3rem; }
 .status { color: var(--azure); font-size: 0.78rem; margin-top: 0.3rem; }
 .empty { color: var(--muted); font-style: italic; font-size: 0.85rem; padding: 0.6rem 0; }
 
@@ -422,19 +401,19 @@ h3 { color: var(--azure); margin-bottom: 0.8rem; }
 .nm { font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .star { color: var(--gold); font-size: 1rem; }
 .del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; }
-.del:hover { color: #ff6b6b; }
+.del:hover { color: var(--dt-error); }
 .pos { width: 1.4rem; text-align: center; font-family: var(--font-display); color: var(--muted); }
 .score { font-weight: 800; color: var(--gold); font-size: 0.9rem; display: flex; align-items: center; gap: 0.2rem; }
 .score small { color: var(--muted); font-weight: 400; }
 
 /* Notificaciones */
-.notif { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border, rgba(255,255,255,0.1)); }
+.notif { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border, var(--dt-line-soft)); }
 .notif-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .warn-note { color: var(--gold); }
 .switch {
   flex-shrink: 0; width: 44px; height: 26px; border-radius: 999px;
-  border: 1px solid var(--border, rgba(255,255,255,0.2));
-  background: rgba(255,255,255,0.12); position: relative; cursor: pointer; padding: 0;
+  border: 1px solid var(--border, var(--dt-line));
+  background: color-mix(in srgb, var(--dt-text) 12%, transparent); position: relative; cursor: pointer; padding: 0;
   transition: background .15s ease;
 }
 .switch .knob {

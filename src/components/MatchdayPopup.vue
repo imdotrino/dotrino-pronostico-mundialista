@@ -207,7 +207,7 @@ function save () {
   background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 8px;
   padding: 0.25rem 0.6rem; cursor: pointer; font-weight: 700; font-size: 0.78rem; font-family: inherit;
 }
-.adv button.on { background: var(--azure); color: #042038; border-color: var(--azure); }
+.adv button.on { background: var(--azure); color: var(--dt-accent-ink); border-color: var(--azure); }
 
 .done { margin-top: 0.7rem; font-size: 0.84rem; font-weight: 700; color: var(--green); }
 .acts { display: flex; gap: 0.5rem; margin-top: 0.9rem; }
@@ -216,7 +216,7 @@ function save () {
   border-radius: 10px; padding: 0.6rem; cursor: pointer; font-weight: 700; font-family: inherit;
 }
 .go {
-  flex: 2; background: var(--azure); color: #042038; border: none; border-radius: 10px;
+  flex: 2; background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 10px;
   padding: 0.6rem; cursor: pointer; font-weight: 800; font-family: inherit;
 }
 .go:disabled { opacity: 0.5; cursor: default; }

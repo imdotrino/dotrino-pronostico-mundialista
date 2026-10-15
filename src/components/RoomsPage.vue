@@ -439,24 +439,24 @@ input, .sel { width: 100%; background: var(--bg); border: 1px solid var(--line);
 .check input { width: auto; }
 .check span { font-size: 0.85rem; }
 .hint { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; }
-.primary { background: var(--azure); color: #042038; border: none; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 800; cursor: pointer; font-family: inherit; }
+.primary { background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 800; cursor: pointer; font-family: inherit; }
 .primary.full { width: 100%; margin-top: 0.8rem; }
 .primary:disabled { opacity: 0.5; cursor: default; }
-.err { color: #ff6b6b; font-size: 0.8rem; margin-top: 0.4rem; }
+.err { color: var(--dt-error); font-size: 0.8rem; margin-top: 0.4rem; }
 .status { color: var(--azure); font-size: 0.8rem; margin-top: 0.4rem; }
 .empty { color: var(--muted); font-style: italic; font-size: 0.85rem; padding: 0.4rem 0; }
 
-.contribute { border: 1px solid var(--azure); border-radius: 12px; padding: 0.9rem; margin-bottom: 0.9rem; background: rgba(65,180,255,0.06); }
-.contribute.friend { border-color: var(--gold); background: rgba(255, 200, 87, 0.05); }
+.contribute { border: 1px solid var(--azure); border-radius: 12px; padding: 0.9rem; margin-bottom: 0.9rem; background: color-mix(in srgb, var(--dt-accent) 6%, transparent); }
+.contribute.friend { border-color: var(--gold); background: color-mix(in srgb, var(--dt-busy) 5%, transparent); }
 .fwd-note { color: var(--azure); margin-bottom: 0.45rem; }
 .contribute-h { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.5rem; }
 .pick { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.35rem 0; }
 .pick-nm { font-size: 0.88rem; }
 .pick-nm small { color: var(--muted); font-size: 0.72rem; }
 .mine-note { font-size: 0.85rem; color: var(--green); margin-bottom: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.go { background: var(--azure); color: #042038; border: none; border-radius: 8px; padding: 0.45rem 0.9rem; font-weight: 800; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.go { background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 8px; padding: 0.45rem 0.9rem; font-weight: 800; cursor: pointer; white-space: nowrap; font-family: inherit; }
 .go.ghost { background: transparent; color: var(--azure); border: 1px solid var(--azure); }
-.go.danger { background: transparent; color: #ff6b6b; border: 1px solid #ff6b6b; }
+.go.danger { background: transparent; color: var(--dt-error); border: 1px solid var(--dt-error); }
 .go:disabled { opacity: 0.5; cursor: default; }
 .mini-share { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
 .mine-actions { display: inline-flex; gap: 0.4rem; }
@@ -472,9 +472,9 @@ input, .sel { width: 100%; background: var(--bg); border: 1px solid var(--line);
 .contact, .member { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0; border-top: 1px solid var(--line-soft); max-width: 480px; }
 .contact { cursor: pointer; }
 .c-nm { flex: 1; min-width: 0; font-weight: 700; font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.you { font-size: 0.6rem; background: var(--azure); color: #042038; border-radius: 5px; padding: 0 0.25rem; font-weight: 800; margin-left: 0.3rem; }
+.you { font-size: 0.6rem; background: var(--azure); color: var(--dt-accent-ink); border-radius: 5px; padding: 0 0.25rem; font-weight: 800; margin-left: 0.3rem; }
 .mono { font-family: monospace; font-size: 0.66rem; color: var(--muted); }
-.badge { font-size: 0.75rem; color: #e0a; }
+.badge { font-size: 0.75rem; color: var(--dt-violet); }
 .badge.ok { color: var(--green); }
 .seal { font-size: 0.78rem; cursor: help; flex-shrink: 0; }
 .seal.ok { color: var(--green); }

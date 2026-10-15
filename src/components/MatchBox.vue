@@ -68,7 +68,7 @@ const emit = defineEmits<{ choose: [teamId: number | null] }>()
 .side:first-child { border-top: none; }
 .side.clickable { cursor: pointer; }
 .side.clickable:hover { background: var(--panel-2); }
-.side.picked { background: rgba(65, 180, 255, 0.24); box-shadow: inset 0 0 0 1px rgba(65, 180, 255, 0.5); }
+.side.picked { background: color-mix(in srgb, var(--dt-accent) 24%, transparent); box-shadow: inset 0 0 0 1px rgba(65, 180, 255, 0.5); }
 .side.picked .code { color: var(--green); }
 .flag { font-size: 1.15rem; line-height: 1; }
 .code { font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.04em; line-height: 1; }

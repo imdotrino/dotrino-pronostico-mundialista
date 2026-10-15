@@ -122,7 +122,7 @@ function pairNames (group: number, pair: number): string {
 .what .phase { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
 .what .when { font-size: 0.66rem; color: var(--muted); opacity: 0.85; }
 .pts {
-  flex-shrink: 0; margin-left: 0.6rem; background: rgba(46, 204, 113, 0.18); color: var(--green);
+  flex-shrink: 0; margin-left: 0.6rem; background: color-mix(in srgb, var(--dt-ok) 18%, transparent); color: var(--green);
   font-weight: 800; border-radius: 6px; padding: 0.05rem 0.4rem; font-size: 0.8rem;
 }
 </style>

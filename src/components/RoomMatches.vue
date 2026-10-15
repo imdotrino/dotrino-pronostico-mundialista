@@ -254,13 +254,13 @@ th.match-h { z-index: 3; }
 .sec td { background: var(--panel-2); color: var(--gold); font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .cell { text-align: center; color: var(--muted); }
 .cell.me { color: var(--text); }
-.cell.hit { background: rgba(78, 222, 128, 0.14); color: var(--green); font-weight: 700; }
-.cell.exact { background: rgba(78, 222, 128, 0.30); color: var(--green); font-weight: 800; }
-.you { font-size: 0.58rem; background: var(--azure); color: #042038; border-radius: 5px; padding: 0 0.25rem; font-weight: 800; margin-left: 0.3rem; }
+.cell.hit { background: color-mix(in srgb, var(--dt-ok) 14%, transparent); color: var(--green); font-weight: 700; }
+.cell.exact { background: color-mix(in srgb, var(--dt-ok) 30%, transparent); color: var(--green); font-weight: 800; }
+.you { font-size: 0.58rem; background: var(--azure); color: var(--dt-accent-ink); border-radius: 5px; padding: 0 0.25rem; font-weight: 800; margin-left: 0.3rem; }
 .legend { display: flex; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.72rem; }
-.chip { border-radius: 5px; padding: 0.1rem 0.45rem; color: var(--muted); background: rgba(255, 255, 255, 0.05); }
-.chip.hit { background: rgba(78, 222, 128, 0.14); color: var(--green); }
-.chip.exact { background: rgba(78, 222, 128, 0.30); color: var(--green); font-weight: 700; }
-.chip.warn { background: rgba(255, 207, 63, 0.12); color: var(--gold); }
+.chip { border-radius: 5px; padding: 0.1rem 0.45rem; color: var(--muted); background: color-mix(in srgb, var(--dt-text) 5%, transparent); }
+.chip.hit { background: color-mix(in srgb, var(--dt-ok) 14%, transparent); color: var(--green); }
+.chip.exact { background: color-mix(in srgb, var(--dt-ok) 30%, transparent); color: var(--green); font-weight: 700; }
+.chip.warn { background: color-mix(in srgb, var(--dt-busy) 12%, transparent); color: var(--gold); }
 .cell.unproven { color: var(--gold); }
 </style>

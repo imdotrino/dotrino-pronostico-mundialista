@@ -316,10 +316,10 @@ const scores = computed<Record<string, number>>(() => {
   display: flex; align-items: center; justify-content: space-between;
   padding: 1rem; font-weight: 700; background: var(--green-d);
 }
-.x { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; line-height: 1; }
+.x { background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; line-height: 1; }
 .actions { display: flex; gap: 0.5rem; padding: 0.8rem; }
 .act { flex: 1; border: none; border-radius: 8px; padding: 0.6rem; font-weight: 700; cursor: pointer; }
-.act.new { background: var(--green); color: #04210f; }
+.act.new { background: var(--green); color: var(--dt-text); }
 .act.imp { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); }
 .group { padding: 0.4rem 0.8rem; overflow-y: auto; }
 .group h4 { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0.6rem 0 0.4rem; }
@@ -336,7 +336,7 @@ const scores = computed<Record<string, number>>(() => {
   background: transparent; color: var(--azure); border: 1px solid var(--azure);
   font-weight: 700; font-size: 0.82rem;
 }
-.scoring-btn:hover { background: rgba(65, 180, 255, 0.12); }
+.scoring-btn:hover { background: color-mix(in srgb, var(--dt-accent) 12%, transparent); }
 
 /* Conmutador de sección Pronósticos / Salas */
 .section-tabs { display: flex; gap: 0.3rem; padding: 0.7rem 0.8rem 0.3rem; }
@@ -344,7 +344,7 @@ const scores = computed<Record<string, number>>(() => {
   flex: 1; background: transparent; border: 1px solid var(--line); color: var(--muted);
   padding: 0.5rem; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.8rem;
 }
-.section-tabs button.on { background: var(--green); color: #04210f; border-color: var(--green); }
+.section-tabs button.on { background: var(--green); color: var(--dt-text); border-color: var(--green); }
 
 .daily-hint { color: var(--muted); font-size: 0.76rem; margin-bottom: 0.5rem; }
 
@@ -367,10 +367,10 @@ const scores = computed<Record<string, number>>(() => {
 .fill-tag { font-size: 0.62rem; font-weight: 700; color: var(--muted); }
 .fill-tag.full { color: var(--green); }
 .score-chip {
-  margin-top: 0.2rem; align-self: flex-start; background: var(--azure); color: #04210f;
+  margin-top: 0.2rem; align-self: flex-start; background: var(--azure); color: var(--dt-text);
   font-weight: 800; font-size: 0.7rem; border-radius: 6px; padding: 0.05rem 0.4rem; white-space: nowrap;
 }
-.nm .auth { font-size: 0.68rem; color: #e0a; }
+.nm .auth { font-size: 0.68rem; color: var(--dt-violet); }
 .nm .auth.ok { color: var(--green); }
 .auth { color: var(--muted); }
 .tools { display: flex; gap: 0.15rem; flex-shrink: 0; }
@@ -381,9 +381,9 @@ const scores = computed<Record<string, number>>(() => {
 }
 .tools svg { display: block; }
 .tools .pdf-img { display: block; width: 14px; height: 17px; }
-.tools button:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.tools button:hover { background: color-mix(in srgb, var(--dt-text) 10%, transparent); color: var(--text); }
 .tools .share-i { color: var(--azure); }
-.tools .share-i:hover { background: rgba(65, 180, 255, 0.18); color: var(--azure); }
+.tools .share-i:hover { background: color-mix(in srgb, var(--dt-accent) 18%, transparent); color: var(--azure); }
 
 /* En táctil agrandamos el área de toque (sin padding absurdo). DOS COLUMNAS: el
    NOMBRE tiene prioridad (ancho mínimo garantizado) y NO se lo empuja; la columna

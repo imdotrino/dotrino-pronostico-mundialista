@@ -136,11 +136,11 @@ function isCorrect (officialId: number | null | undefined, id: number | null): b
 .tbl th { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
 .row-h { text-align: left; font-weight: 700; position: sticky; left: 0; background: var(--panel); }
 .grp { padding: 0.4rem 0.3rem; }
-.you { font-size: 0.6rem; background: var(--azure); color: #042038; border-radius: 5px; padding: 0 0.25rem; font-weight: 800; margin-left: 0.3rem; }
+.you { font-size: 0.6rem; background: var(--azure); color: var(--dt-accent-ink); border-radius: 5px; padding: 0 0.25rem; font-weight: 800; margin-left: 0.3rem; }
 .pname { font-size: 0.74rem; color: var(--muted); font-weight: 400; }
-.hit { background: rgba(78, 222, 128, 0.16); color: var(--green); font-weight: 700; }
+.hit { background: color-mix(in srgb, var(--dt-ok) 16%, transparent); color: var(--green); font-weight: 700; }
 .dash { color: var(--muted); }
 .sealed { color: var(--gold); font-style: italic; }
-.me .row-h { background: rgba(65, 180, 255, 0.12); }
+.me .row-h { background: color-mix(in srgb, var(--dt-accent) 12%, transparent); }
 .hint { font-size: 0.76rem; color: var(--muted); margin-top: 0.6rem; }
 </style>

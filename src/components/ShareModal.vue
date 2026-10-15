@@ -57,7 +57,7 @@ const hint = computed(() => {
 
 const theme = {
   '--ccs-bg': 'var(--panel)', '--ccs-text': 'var(--text)', '--ccs-muted': 'var(--muted)',
-  '--ccs-border': 'var(--line)', '--ccs-accent': 'var(--green-d)', '--ccs-accent-text': '#fff',
+  '--ccs-border': 'var(--line)', '--ccs-accent': 'var(--green-d)', '--ccs-accent-text': 'var(--dt-accent-ink)',
   '--ccs-input-bg': 'var(--bg)',
 }
 </script>
@@ -99,5 +99,5 @@ const theme = {
 /* Imprimir: contorno azul (acción "ligera"). */
 .act-btn.print { background: transparent; color: var(--azure); border: 1.5px solid var(--azure); }
 /* Descargar PDF: fondo claro con borde rojo para que se vea el ícono oficial. */
-.act-btn.pdf { background: #fff; color: #b3160c; border: 1.5px solid #d4362d; }
+.act-btn.pdf { background: var(--dt-surface); color: var(--dt-error); border: 1.5px solid var(--dt-error); }
 </style>

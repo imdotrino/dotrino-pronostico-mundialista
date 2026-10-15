@@ -28,7 +28,7 @@ watch(roomShareOpen, async (open) => {
 
 const theme = {
   '--ccs-bg': 'var(--panel)', '--ccs-text': 'var(--text)', '--ccs-muted': 'var(--muted)',
-  '--ccs-border': 'var(--line)', '--ccs-accent': 'var(--green)', '--ccs-accent-text': '#fff',
+  '--ccs-border': 'var(--line)', '--ccs-accent': 'var(--green)', '--ccs-accent-text': 'var(--dt-accent-ink)',
   '--ccs-input-bg': 'var(--bg)',
 }
 </script>

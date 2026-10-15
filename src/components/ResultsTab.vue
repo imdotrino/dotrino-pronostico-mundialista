@@ -507,11 +507,11 @@ function clearAll (): void {
   border-radius: 50px; padding: 0.4rem 0.9rem; cursor: pointer;
   font-family: inherit; font-weight: 700; font-size: 0.8rem;
 }
-.util:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
+.util:hover { background: color-mix(in srgb, var(--dt-text) 6%, transparent); color: var(--text); }
 .util.official { color: var(--azure); border-color: var(--azure); }
-.util.official:hover { background: rgba(65, 180, 255, 0.18); color: var(--azure); }
-.util.publish { color: var(--lime, #b6e34a); border-color: var(--lime, #b6e34a); }
-.util.publish:hover { background: rgba(182, 227, 74, 0.16); }
+.util.official:hover { background: color-mix(in srgb, var(--dt-accent) 18%, transparent); color: var(--azure); }
+.util.publish { color: var(--lime, var(--dt-ok)); border-color: var(--lime, var(--dt-ok)); }
+.util.publish:hover { background: color-mix(in srgb, var(--dt-ok) 16%, transparent); }
 .util:disabled { opacity: 0.5; cursor: default; }
 
 /* Procedencia de los resultados oficiales (de dónde vienen los valores). */
@@ -519,14 +519,14 @@ function clearAll (): void {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
   margin: 0.1rem 0 0.4rem; font-size: 0.78rem; color: var(--muted);
 }
-.src-line.warn { color: #ffb454; }
+.src-line.warn { color: var(--dt-busy); }
 .src-lbl { font-weight: 700; }
 .src-chip {
   border: 1px solid var(--line); border-radius: 50px; padding: 0.05rem 0.5rem;
   font-weight: 700; font-size: 0.72rem; color: var(--azure); border-color: var(--azure);
 }
 .src-chip.off { color: var(--muted); border-color: var(--line); text-decoration: line-through; }
-.src-chip.manual { color: var(--lime, #b6e34a); border-color: var(--lime, #b6e34a); }
+.src-chip.manual { color: var(--lime, var(--dt-ok)); border-color: var(--lime, var(--dt-ok)); }
 .src-when { opacity: 0.8; }
 
 .tab-hint { color: var(--muted); font-size: 0.83rem; margin-bottom: 0.9rem; text-align: center; }
@@ -577,8 +577,8 @@ function clearAll (): void {
   font-family: var(--font-display); letter-spacing: 0.03em; font-size: 0.82rem;
 }
 .pk.draw { min-width: 1.9rem; padding: 0; font-family: inherit; }
-.pk:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); color: var(--text); }
-.pk.on { background: var(--azure); color: #042038; border-color: var(--azure); }
+.pk:hover:not(:disabled) { background: color-mix(in srgb, var(--dt-text) 6%, transparent); color: var(--text); }
+.pk.on { background: var(--azure); color: var(--dt-accent-ink); border-color: var(--azure); }
 .pk:disabled { cursor: default; }
 
 /* Fecha/hora local del partido: línea chica y tenue debajo de cada fila. */
@@ -610,7 +610,7 @@ function clearAll (): void {
   border-radius: 8px;
 }
 /* Lado que avanza (decidido por goles/penales). */
-.ko-side.winner { background: rgba(46, 204, 113, 0.16); }
+.ko-side.winner { background: color-mix(in srgb, var(--dt-ok) 16%, transparent); }
 .ko-side.winner .code { color: var(--green); font-weight: 800; }
 .ko-side .code { flex: 1; }
 .ko-side .ph { flex: 1; color: var(--muted); font-size: 0.78rem; font-style: italic; }
@@ -621,7 +621,7 @@ function clearAll (): void {
   color: var(--muted); font-weight: 700; cursor: pointer; font-family: inherit;
   font-size: 0.72rem; padding: 0.25rem 0.55rem; white-space: nowrap;
 }
-.ko-win:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); color: var(--text); }
-.ko-win.on { background: var(--azure); color: #042038; border-color: var(--azure); }
+.ko-win:hover:not(:disabled) { background: color-mix(in srgb, var(--dt-text) 6%, transparent); color: var(--text); }
+.ko-win.on { background: var(--azure); color: var(--dt-accent-ink); border-color: var(--azure); }
 .ko-win:disabled { cursor: default; opacity: 0.5; }
 </style>

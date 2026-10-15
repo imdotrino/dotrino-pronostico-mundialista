@@ -114,7 +114,7 @@ h3 { margin-bottom: 0.7rem; color: var(--azure); text-align: center; }
   flex: 1; background: transparent; border: 1px solid var(--line); color: var(--muted);
   padding: 0.45rem; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem;
 }
-.tabs button.on { background: var(--azure); color: #04210f; border-color: var(--azure); }
+.tabs button.on { background: var(--azure); color: var(--dt-text); border-color: var(--azure); }
 .mode-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.8rem; font-style: italic; }
 
 .block {
@@ -128,10 +128,10 @@ h3 { margin-bottom: 0.7rem; color: var(--azure); text-align: center; }
 .ej { color: var(--muted); font-style: italic; margin-top: 0.35rem; font-size: 0.78rem; }
 .no-extra { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-bottom: 0.7rem; }
 .pts {
-  display: inline-block; background: var(--azure); color: #04210f;
+  display: inline-block; background: var(--azure); color: var(--dt-text);
   font-weight: 800; border-radius: 6px; padding: 0.05rem 0.4rem; font-size: 0.82rem;
 }
-.block.extra .pts { background: var(--gold); color: #3a2e00; }
+.block.extra .pts { background: var(--gold); color: var(--dt-surface); }
 .rounds { list-style: none; margin: 0.4rem 0 0; }
 .rounds li {
   display: flex; align-items: center; justify-content: space-between;
@@ -144,7 +144,7 @@ h3 { margin-bottom: 0.7rem; color: var(--azure); text-align: center; }
   padding: 0.65rem; margin: 0.5rem 0 0.9rem; text-align: center;
 }
 .ok {
-  width: 100%; background: var(--azure); color: #04210f; border: none;
+  width: 100%; background: var(--azure); color: var(--dt-text); border: none;
   border-radius: 9px; padding: 0.7rem; font-weight: 800; cursor: pointer;
 }
 .ok:hover { filter: brightness(1.06); }

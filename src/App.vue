@@ -1337,7 +1337,7 @@ onUnmounted(() => {
       class="scoreboard"
       brand-href="./"
       :lang="locale"
-      profile
+      profile theme
       support-href="https://ko-fi.com/dotrino"
       support-repo="imdotrino/dotrino-pronostico-mundialista"
       support-discord="https://discord.gg/D648uq7cth"
@@ -1766,7 +1766,7 @@ onUnmounted(() => {
    antiguo .install-inline vía custom properties + ::part(button). */
 .cc-install {
   margin-left: auto; flex-shrink: 0;
-  --cc-install-color: #042038;
+  --cc-install-color: var(--dt-accent-ink);
   --cc-install-bg-hover: var(--azure);
   --cc-install-radius: 50px;
   --cc-install-font-size: 0.82rem;
@@ -1775,7 +1775,7 @@ onUnmounted(() => {
   --cc-install-accent: var(--azure);
 }
 .cc-install::part(button) {
-  background: var(--azure); color: #042038; border: none;
+  background: var(--azure); color: var(--dt-accent-ink); border: none;
   padding: 0.28rem 0.85rem; font-weight: 800; white-space: nowrap;
 }
 .cc-install::part(button):hover { filter: brightness(1.06); }
@@ -1785,24 +1785,17 @@ onUnmounted(() => {
    defecto). El sticky va en el host: el .bar interno no lo es. */
 .scoreboard {
   position: sticky; top: 0; z-index: 50;
-  --dotrino-topbar-bg: linear-gradient(180deg, rgba(16, 42, 82, 0.96), rgba(10, 23, 48, 0.96));
-  --dotrino-topbar-border: var(--line);
-  --dotrino-topbar-text: var(--text);
-  --dotrino-topbar-muted: var(--muted);
-  --dotrino-topbar-accent: var(--azure);
-  --dotrino-topbar-accent-text: #042038;
-  --dotrino-topbar-font: var(--font-body);
   --dotrino-topbar-pad: 0.7rem 0.9rem;
   --dotrino-topbar-gap: 0.6rem;
 }
 /* Marca a medida (slot "brand"): escudo + "Mundial · Pronóstico 2026". */
 .brand { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
 .menu {
-  background: rgba(65, 180, 255, 0.12); color: var(--text);
+  background: color-mix(in srgb, var(--dt-accent) 12%, transparent); color: var(--text);
   border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
   width: 42px; height: 42px; font-size: 1.3rem; flex-shrink: 0;
 }
-.menu:hover { background: rgba(65, 180, 255, 0.22); }
+.menu:hover { background: color-mix(in srgb, var(--dt-accent) 22%, transparent); }
 .brand-logo { width: 38px; height: 38px; flex-shrink: 0; object-fit: contain; }
 .title { line-height: 1; min-width: 0; }
 .cup { display: block; font-size: 0.6rem; letter-spacing: 0.28em; color: var(--azure); font-weight: 700; text-transform: uppercase; }
@@ -1813,7 +1806,7 @@ onUnmounted(() => {
   position: relative;
   display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
   padding: 0.5rem 1rem; font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--dt-text) 2%, transparent); border-bottom: 1px solid var(--line-soft);
 }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--azure); box-shadow: 0 0 8px var(--azure); }
 .dot.ro { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
@@ -1823,7 +1816,7 @@ onUnmounted(() => {
   display: inline-flex; align-items: center; gap: 0.35rem; font-family: inherit;
 }
 .active-name.editable { cursor: pointer; }
-.active-name.editable:hover { background: rgba(255, 255, 255, 0.06); }
+.active-name.editable:hover { background: color-mix(in srgb, var(--dt-text) 6%, transparent); }
 .active-name .pen { color: var(--azure); font-size: 0.75rem; opacity: 0.7; }
 .name-input {
   background: var(--bg); border: 1px solid var(--azure); border-radius: 6px;
@@ -1842,7 +1835,7 @@ onUnmounted(() => {
 }
 .bar-actions svg { display: block; }
 .bar-actions .pdf-img { display: block; width: 15px; height: 18px; }
-.bar-actions button:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.bar-actions button:hover { background: color-mix(in srgb, var(--dt-text) 10%, transparent); color: var(--text); }
 
 /* En táctil (mobile) los íconos de acción son difíciles de tocar: agrandamos el
    área de toque (~44px) y los íconos. En escritorio (mouse) quedan como están. */
@@ -1854,14 +1847,14 @@ onUnmounted(() => {
   .mini { padding: 0.45rem 0.7rem; font-size: 0.8rem; }
 }
 .bar-actions .share-i { color: var(--azure); }
-.bar-actions .share-i:hover { background: rgba(65, 180, 255, 0.18); color: var(--azure); }
-.bar-actions .danger-i:hover { background: rgba(255, 80, 80, 0.18); color: #ff8585; }
+.bar-actions .share-i:hover { background: color-mix(in srgb, var(--dt-accent) 18%, transparent); color: var(--azure); }
+.bar-actions .danger-i:hover { background: color-mix(in srgb, var(--dt-error) 18%, transparent); color: var(--dt-error); }
 
 /* Selector de modo de juego */
 .mode-bar {
   display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
   padding: 0.5rem 1rem; border-bottom: 1px solid var(--line-soft);
-  background: rgba(255, 255, 255, 0.015);
+  background: color-mix(in srgb, var(--dt-text) 2%, transparent);
 }
 .mode-label { color: var(--muted); font-size: 0.8rem; font-weight: 700; }
 .scope-label { padding-left: 0.6rem; border-left: 1px solid var(--line); }
@@ -1871,7 +1864,7 @@ onUnmounted(() => {
   border: 1px solid var(--line); border-radius: 50px; padding: 0.3rem 0.8rem;
   cursor: pointer; font-family: inherit; font-weight: 700; font-size: 0.78rem;
 }
-.mode-clone:hover { background: rgba(65, 180, 255, 0.14); }
+.mode-clone:hover { background: color-mix(in srgb, var(--dt-accent) 14%, transparent); }
 
 /* Modal selector de tipo (Nuevo / Clonar) */
 .type-modal {
@@ -1888,7 +1881,7 @@ onUnmounted(() => {
   padding: 0.1rem 0.5rem; cursor: pointer; font-family: inherit; font-weight: 700;
   font-size: 0.72rem; white-space: nowrap; flex-shrink: 0;
 }
-.step-back:hover { background: rgba(65, 180, 255, 0.12); }
+.step-back:hover { background: color-mix(in srgb, var(--dt-accent) 12%, transparent); }
 .type-opt {
   display: flex; flex-direction: column; gap: 0.15rem; width: 100%; text-align: left;
   background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
@@ -1919,11 +1912,11 @@ onUnmounted(() => {
 .warn-modal p { font-size: 0.88rem; color: var(--text); margin-bottom: 0.7rem; }
 .warn-list {
   list-style: none; margin: 0 0 1rem; padding: 0.55rem 0.7rem;
-  background: rgba(255, 207, 63, 0.08); border: 1px solid var(--line); border-radius: 10px;
+  background: color-mix(in srgb, var(--dt-busy) 8%, transparent); border: 1px solid var(--line); border-radius: 10px;
   font-size: 0.84rem; color: var(--text); max-height: 9.5rem; overflow-y: auto;
 }
 .warn-list li { padding: 0.18rem 0; font-variant-numeric: tabular-nums; }
-.warn-list li + li { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.warn-list li + li { border-top: 1px solid var(--dt-line-soft); }
 .warn-list .warn-more { color: var(--muted); font-style: italic; }
 .warn-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
 .warn-cancel {
@@ -1931,7 +1924,7 @@ onUnmounted(() => {
   border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; font-weight: 700;
 }
 .warn-go {
-  background: var(--gold); color: #3a2e00; border: none; border-radius: 8px;
+  background: var(--gold); color: var(--dt-surface); border: none; border-radius: 8px;
   padding: 0.5rem 1rem; cursor: pointer; font-weight: 800;
 }
 
@@ -1944,7 +1937,7 @@ onUnmounted(() => {
 }
 .confirm-msg { color: var(--gold); font-size: 0.82rem; font-weight: 700; }
 .confirm-btn {
-  background: var(--gold); color: #2a1d00; border: none; border-radius: 50px;
+  background: var(--gold); color: var(--dt-surface); border: none; border-radius: 50px;
   padding: 0.5rem 1.1rem; font-weight: 800; cursor: pointer; font-family: inherit;
   font-size: 0.85rem; white-space: nowrap; box-shadow: 0 4px 16px rgba(255, 207, 63, 0.35);
 }
@@ -1955,7 +1948,7 @@ onUnmounted(() => {
   padding: 0.5rem 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
   font-size: 0.85rem; white-space: nowrap;
 }
-.cancel-btn:hover { background: rgba(255, 207, 63, 0.12); }
+.cancel-btn:hover { background: color-mix(in srgb, var(--dt-busy) 12%, transparent); }
 
 /* Franja de sellado del pronóstico (certificar fecha / cancelar edición) */
 .seal-bar {
@@ -1963,7 +1956,7 @@ onUnmounted(() => {
   flex-wrap: wrap; padding: 0.45rem 1rem;
   border-bottom: 1px solid var(--line);
 }
-.seal-bar.sealed { background: rgba(46, 204, 113, 0.07); border-bottom-color: rgba(46, 204, 113, 0.45); }
+.seal-bar.sealed { background: color-mix(in srgb, var(--dt-ok) 7%, transparent); border-bottom-color: color-mix(in srgb, var(--dt-ok) 45%, transparent); }
 .seal-bar.stale {
   background: linear-gradient(90deg, rgba(255, 207, 63, 0.14), rgba(255, 207, 63, 0.05));
   border-bottom-color: var(--gold);
@@ -1973,7 +1966,7 @@ onUnmounted(() => {
 .seal-bar.stale .seal-msg { color: var(--gold); }
 .seal-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .seal-btn {
-  background: var(--azure); color: #042038; border: none; border-radius: 50px;
+  background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 50px;
   padding: 0.42rem 1rem; font-weight: 800; cursor: pointer; font-family: inherit;
   font-size: 0.82rem; white-space: nowrap;
 }
@@ -1984,8 +1977,8 @@ onUnmounted(() => {
   padding: 0.42rem 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit;
   font-size: 0.82rem; white-space: nowrap;
 }
-.seal-cancel:hover { background: rgba(255, 207, 63, 0.12); }
-.seal-err { color: #ff6b6b; font-size: 0.78rem; flex-basis: 100%; }
+.seal-cancel:hover { background: color-mix(in srgb, var(--dt-busy) 12%, transparent); }
+.seal-err { color: var(--dt-error); font-size: 0.78rem; flex-basis: 100%; }
 
 .tabs { display: flex; gap: 0.4rem; padding: 0.8rem 1rem 0; }
 .tabs button {
@@ -2020,9 +2013,9 @@ onUnmounted(() => {
   width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
   color: var(--text); padding: 0.6rem; font-size: 0.85rem; resize: vertical; font-family: monospace;
 }
-.imp-err { color: #ff6b6b; font-size: 0.8rem; margin-top: 0.5rem; }
+.imp-err { color: var(--dt-error); font-size: 0.8rem; margin-top: 0.5rem; }
 .imp-go {
-  margin-top: 0.8rem; width: 100%; background: var(--azure); color: #042038; border: none;
+  margin-top: 0.8rem; width: 100%; background: var(--azure); color: var(--dt-accent-ink); border: none;
   border-radius: 10px; padding: 0.7rem; font-weight: 800; cursor: pointer;
 }
 .imp-go:disabled { opacity: 0.5; cursor: default; }
@@ -2034,7 +2027,7 @@ onUnmounted(() => {
   border-radius: 6px; padding: 0.1rem 0.45rem; color: var(--muted);
 }
 .room-status.online { color: var(--green); border-color: var(--green); }
-.room-status.unsealable { color: var(--warn, #e0a01a); border-color: var(--warn, #e0a01a); }
+.room-status.unsealable { color: var(--warn, var(--dt-busy)); border-color: var(--warn, var(--dt-busy)); }
 /* Un único margin-left:auto (en el grupo de acciones) empuja acciones + "volver"
    a la derecha; "volver" queda al borde, a la derecha del botón de compartir.
    (Dos autos repartirían el espacio y dejarían "volver" al centro.) */
@@ -2050,7 +2043,7 @@ onUnmounted(() => {
 .invite-toast .it-msg { font-size: 0.85rem; font-weight: 700; }
 .invite-toast .it-actions { display: flex; gap: 0.4rem; }
 .invite-toast .it-open {
-  background: var(--azure); color: #042038; border: none; border-radius: 8px;
+  background: var(--azure); color: var(--dt-accent-ink); border: none; border-radius: 8px;
   padding: 0.4rem 0.8rem; font-weight: 800; cursor: pointer;
 }
 .invite-toast .it-ignore {
