@@ -42,7 +42,9 @@ async function mockSigner (page: Page): Promise<{ count: () => number }> {
     const sig = btoa(String.fromCharCode(...new Uint8Array(64).fill(7)))
     await route.fulfill({
       headers: { ...cors, 'Content-Type': 'application/json' },
-      json: { op: 'seal', ts: Date.now(), signature: sig },
+      // La hora del sello es la del "hoy" fingido, no la real: con la real, en cuanto el
+      // calendario pasó del 15-jun el sello caía después del partido y salía «tarde».
+      json: { op: 'seal', ts: FAKE_NOW, signature: sig },
     })
   })
   return { count: () => n }
