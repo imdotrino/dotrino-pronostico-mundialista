@@ -1,5 +1,5 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
-import { vaultInit, llaves, type VaultKeys } from './_vault'
+import { vaultInit, makeKeys, type VaultKeys } from './_vault'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -53,7 +53,7 @@ async function seed (page: Page, roomId: string, nick: string, hostPubkey: strin
 }
 
 /** La pubkey del vault de prueba de esta pestaña (la que firma y por la que se enruta). */
-async function pubkeyDe (page: Page): Promise<string> {
+async function pubkeyOf (page: Page): Promise<string> {
   return page.evaluate(async () => {
     const { getIdentity } = await import('/src/lib/identity.ts')
     const id = await getIdentity()
@@ -131,8 +131,8 @@ test('dos navegadores: aportar → sync por gossip → borrar (tombstone firmado
 
   const ctxA = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 820 } })
   const ctxB = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1100, height: 820 } })
-  await installVault(ctxA, 'Ana', await llaves())
-  await installVault(ctxB, 'Beto', await llaves())
+  await installVault(ctxA, 'Ana', await makeKeys())
+  await installVault(ctxB, 'Beto', await makeKeys())
   const A = await ctxA.newPage()
   const B = await ctxB.newPage()
 
@@ -146,7 +146,7 @@ test('dos navegadores: aportar → sync por gossip → borrar (tombstone firmado
     // Ana crea la sala (es la anfitriona) y Beto entra por su enlace: por eso los dos
     // guardan la MISMA `hostPubkey`, que es la de Ana.
     await A.goto(BASE + '/')
-    const pkAna = await pubkeyDe(A)
+    const pkAna = await pubkeyOf(A)
     await seed(A, roomId, 'Ana', pkAna); await A.reload()
     await B.goto(BASE + '/'); await seed(B, roomId, 'Beto', pkAna); await B.reload()
 

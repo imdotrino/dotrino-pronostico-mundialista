@@ -60,6 +60,6 @@ export async function reportOpen (toPubkey: string, url: string, name?: string):
     // cifrado anunciada todavía), pero tiene que poder buscarse por su `code` — con la
     // frase no, que es lo que convierte «no tengo su llave» y «se cayó la red» en el
     // mismo misterio.
-    console.warn('acuse de apertura no enviado (' + (e?.code || 'sin code') + '): no se manda en claro')
+    console.warn('open receipt not sent (' + (e?.code || 'no code') + '): not sending it in clear')
   }
 }

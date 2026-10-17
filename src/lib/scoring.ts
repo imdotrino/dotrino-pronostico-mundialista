@@ -12,26 +12,26 @@ import { R32, R16, QF, SF, THIRD_PLACE, FINAL } from './bracket'
 
 // Puntos por categoría. El panel "¿Cómo se puntúa?" lee ESTAS mismas constantes.
 export const SCORING = {
-  posicion: 3, // por cada equipo cuya posición de grupo (1.º/2.º/3.º/4.º) coincide
+  position: 3, // por cada equipo cuya posición de grupo (1.º/2.º/3.º/4.º) coincide
   r32: 4, // acertar quién avanza en dieciseisavos
   r16: 6, // octavos
   qf: 9, // cuartos
   sf: 13, // semifinales
   final: 20, // final (campeón)
-  tercero: 5, // partido por el tercer puesto
-  resultado: 1, // acertar gana/empata/pierde de un partido de grupo (Medio y Completo)
-  marcadorExacto: 2, // marcador EXACTO de grupo (solo modo Completo)
+  thirdPlace: 5, // partido por el tercer puesto
+  outcome: 1, // acertar gana/empata/pierde de un partido de grupo (Medio y Completo)
+  exactScore: 2, // marcador EXACTO de grupo (solo modo Completo)
 } as const
 
 export interface ScoreBreakdown {
   /** Puntos por posiciones de grupo acertadas. */
-  posiciones: number
+  positions: number
   /** Puntos por aciertos de llaves (quién avanza) en todas las rondas. */
-  llaves: number
+  bracket: number
   /** Puntos por acertar gana/empata/pierde de partidos de grupo (Medio/Completo). */
-  resultados: number
+  outcomes: number
   /** Puntos extra por marcadores exactos de grupo (solo modo Completo). */
-  marcadores: number
+  exact: number
   /** Suma total. */
   total: number
 }
@@ -42,7 +42,7 @@ const ROUNDS: { matches: { num: number }[]; pts: number; key: string }[] = [
   { matches: R16, pts: SCORING.r16, key: 'r16' },
   { matches: QF, pts: SCORING.qf, key: 'qf' },
   { matches: SF, pts: SCORING.sf, key: 'sf' },
-  { matches: [THIRD_PLACE], pts: SCORING.tercero, key: 'third' },
+  { matches: [THIRD_PLACE], pts: SCORING.thirdPlace, key: 'third' },
   { matches: [FINAL], pts: SCORING.final, key: 'final' },
 ]
 
@@ -52,7 +52,7 @@ const ROUNDS: { matches: { num: number }[]; pts: number; key: string }[] = [
  * cuando la entrada está en modo 'score'. Si la oficial está vacía, devuelve 0.
  */
 export function scoreEntry (entry: SavedPrediction, official: SavedPrediction | null): ScoreBreakdown {
-  const empty: ScoreBreakdown = { posiciones: 0, llaves: 0, resultados: 0, marcadores: 0, total: 0 }
+  const empty: ScoreBreakdown = { positions: 0, bracket: 0, outcomes: 0, exact: 0, total: 0 }
   if (!official || !official.code) return empty
 
   let P, O
@@ -73,14 +73,14 @@ export function scoreEntry (entry: SavedPrediction, official: SavedPrediction | 
   // cuentan las que ya son ciertas (no se puntúa lo incierto).
   const oResults: Results = official.results ?? {}
   const oMode = official.mode ?? 'score'
-  let posiciones = 0
+  let positions = 0
   if (scope !== 'bracket') {
     for (let g = 0; g < 12; g++) {
       const pg = P.groupOrder[g]!
       const certain = certainGroupOrder(g, oResults, oMode)
       for (let pos = 0; pos < 4; pos++) {
-        const teamCierto = certain[pos]
-        if (teamCierto != null && pg[pos] === teamCierto) posiciones += SCORING.posicion
+        const certainTeam = certain[pos]
+        if (certainTeam != null && pg[pos] === certainTeam) positions += SCORING.position
       }
     }
   }
@@ -89,13 +89,13 @@ export function scoreEntry (entry: SavedPrediction, official: SavedPrediction | 
   // decidió (resultado real registrado). Si el oficial aún no lo definió, no
   // se puntúa. El ganador oficial es el pick registrado (O.picks[num]). ---
   const rp = resolveMatches(P)
-  let llaves = 0
+  let bracket = 0
   if (scope !== 'groups') {
     for (const round of ROUNDS) {
       for (const m of round.matches) {
         const wp = rp.get(m.num)?.winner ?? null
         const wo = O.picks[m.num] ?? null // ganador real registrado en el oficial
-        if (wp != null && wo != null && wp === wo) llaves += round.pts
+        if (wp != null && wo != null && wp === wo) bracket += round.pts
       }
     }
   }
@@ -105,8 +105,8 @@ export function scoreEntry (entry: SavedPrediction, official: SavedPrediction | 
   // Completo, además, el marcador exacto. Solo cuenta donde el oficial ya tiene
   // ese resultado (partido jugado). En scope 'bracket' la fase de grupos no es
   // del usuario, así que no puntúa.
-  let resultados = 0
-  let marcadores = 0
+  let outcomes = 0
+  let exact = 0
   if (scope !== 'bracket' && (entry.mode === 'winlose' || entry.mode === 'score')) {
     const er: Results = entry.results ?? {}
     const or: Results = official.results ?? {}
@@ -118,21 +118,21 @@ export function scoreEntry (entry: SavedPrediction, official: SavedPrediction | 
         // Acierto 1/X/2 (Medio y Completo).
         const eo = outcomeOf(a)
         const oo = outcomeOf(b)
-        if (eo != null && oo != null && eo === oo) resultados += SCORING.resultado
+        if (eo != null && oo != null && eo === oo) outcomes += SCORING.outcome
         // Marcador exacto (solo Completo).
         if (entry.mode === 'score' && a && b &&
           typeof a.gh === 'number' && typeof a.ga === 'number' &&
           typeof b.gh === 'number' && typeof b.ga === 'number' &&
           a.gh === b.gh && a.ga === b.ga) {
-          marcadores += SCORING.marcadorExacto
+          exact += SCORING.exactScore
         }
       }
     }
   }
 
   return {
-    posiciones, llaves, resultados, marcadores,
-    total: posiciones + llaves + resultados + marcadores,
+    positions, bracket, outcomes, exact,
+    total: positions + bracket + outcomes + exact,
   }
 }
 
@@ -147,7 +147,7 @@ export interface ScoreDetail {
 }
 
 export function scoreDetail (entry: SavedPrediction, official: SavedPrediction | null): ScoreDetail {
-  const empty: ScoreDetail = { positions: [], outcomes: [], exact: [], bracket: [], breakdown: { posiciones: 0, llaves: 0, resultados: 0, marcadores: 0, total: 0 } }
+  const empty: ScoreDetail = { positions: [], outcomes: [], exact: [], bracket: [], breakdown: { positions: 0, bracket: 0, outcomes: 0, exact: 0, total: 0 } }
   if (!official || !official.code) return empty
 
   let P, O
@@ -156,7 +156,7 @@ export function scoreDetail (entry: SavedPrediction, official: SavedPrediction |
   const oResults: Results = official.results ?? {}
   const oMode = official.mode ?? 'score'
   const scope = P.scope ?? 'all'
-  const detail: ScoreDetail = { positions: [], outcomes: [], exact: [], bracket: [], breakdown: { posiciones: 0, llaves: 0, resultados: 0, marcadores: 0, total: 0 } }
+  const detail: ScoreDetail = { positions: [], outcomes: [], exact: [], bracket: [], breakdown: { positions: 0, bracket: 0, outcomes: 0, exact: 0, total: 0 } }
 
   // Posiciones aseguradas acertadas (no aplican en scope 'bracket').
   if (scope !== 'bracket') {
@@ -164,9 +164,9 @@ export function scoreDetail (entry: SavedPrediction, official: SavedPrediction |
       const pg = P.groupOrder[g]!
       const certain = certainGroupOrder(g, oResults, oMode)
       for (let pos = 0; pos < 4; pos++) {
-        const teamCierto = certain[pos]
-        if (teamCierto != null && pg[pos] === teamCierto) {
-          detail.positions.push({ group: g, pos, teamId: teamCierto, points: SCORING.posicion })
+        const certainTeam = certain[pos]
+        if (certainTeam != null && pg[pos] === certainTeam) {
+          detail.positions.push({ group: g, pos, teamId: certainTeam, points: SCORING.position })
         }
       }
     }
@@ -196,21 +196,21 @@ export function scoreDetail (entry: SavedPrediction, official: SavedPrediction |
         const b = oResults[idx]
         const eo = outcomeOf(a)
         const oo = outcomeOf(b)
-        if (eo != null && oo != null && eo === oo) detail.outcomes.push({ group: g, pair, points: SCORING.resultado })
+        if (eo != null && oo != null && eo === oo) detail.outcomes.push({ group: g, pair, points: SCORING.outcome })
         if (entry.mode === 'score' && a && b &&
           typeof a.gh === 'number' && typeof a.ga === 'number' &&
           typeof b.gh === 'number' && typeof b.ga === 'number' &&
           a.gh === b.gh && a.ga === b.ga) {
-          detail.exact.push({ group: g, pair, gh: a.gh, ga: a.ga, points: SCORING.marcadorExacto })
+          detail.exact.push({ group: g, pair, gh: a.gh, ga: a.ga, points: SCORING.exactScore })
         }
       }
     }
   }
 
-  const posiciones = detail.positions.reduce((s, x) => s + x.points, 0)
-  const llaves = detail.bracket.reduce((s, x) => s + x.points, 0)
-  const resultados = detail.outcomes.reduce((s, x) => s + x.points, 0)
-  const marcadores = detail.exact.reduce((s, x) => s + x.points, 0)
-  detail.breakdown = { posiciones, llaves, resultados, marcadores, total: posiciones + llaves + resultados + marcadores }
+  const positions = detail.positions.reduce((s, x) => s + x.points, 0)
+  const bracket = detail.bracket.reduce((s, x) => s + x.points, 0)
+  const outcomes = detail.outcomes.reduce((s, x) => s + x.points, 0)
+  const exact = detail.exact.reduce((s, x) => s + x.points, 0)
+  detail.breakdown = { positions, bracket, outcomes, exact, total: positions + bracket + outcomes + exact }
   return detail
 }

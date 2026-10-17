@@ -20,7 +20,7 @@ function whenMatch (num: number): string | null { return formatLocal(num, locale
 
 const EMPTY: ScoreDetail = {
   positions: [], outcomes: [], exact: [], bracket: [],
-  breakdown: { posiciones: 0, llaves: 0, resultados: 0, marcadores: 0, total: 0 },
+  breakdown: { positions: 0, bracket: 0, outcomes: 0, exact: 0, total: 0 },
 }
 const d = computed<ScoreDetail>(() => (props.entry ? scoreDetail(props.entry, props.official) : EMPTY))
 
@@ -51,7 +51,7 @@ function pairNames (group: number, pair: number): string {
 
       <!-- Posiciones -->
       <section v-if="d.positions.length" class="cat">
-        <h4>{{ t('scores.positions') }} <span class="sub">+{{ d.breakdown.posiciones }}</span></h4>
+        <h4>{{ t('scores.positions') }} <span class="sub">+{{ d.breakdown.positions }}</span></h4>
         <div v-for="(it, i) in d.positions" :key="'p' + i" class="item">
           <span class="what">
             <span class="phase">{{ t('print.groups') }} · {{ t('group.title', { letter: GROUP_LETTERS[it.group] }) }}</span>
@@ -63,7 +63,7 @@ function pairNames (group: number, pair: number): string {
 
       <!-- Llaves -->
       <section v-if="d.bracket.length" class="cat">
-        <h4>{{ t('scores.bracket') }} <span class="sub">+{{ d.breakdown.llaves }}</span></h4>
+        <h4>{{ t('scores.bracket') }} <span class="sub">+{{ d.breakdown.bracket }}</span></h4>
         <div v-for="(it, i) in d.bracket" :key="'b' + i" class="item">
           <span class="what">
             <span class="phase">{{ t(ROUND_KEY[it.roundKey] || 'bracket.r32Short') }} · #{{ it.num }}</span>
@@ -76,7 +76,7 @@ function pairNames (group: number, pair: number): string {
 
       <!-- Resultados 1/–/2 -->
       <section v-if="d.outcomes.length" class="cat">
-        <h4>{{ t('scores.outcomes') }} <span class="sub">+{{ d.breakdown.resultados }}</span></h4>
+        <h4>{{ t('scores.outcomes') }} <span class="sub">+{{ d.breakdown.outcomes }}</span></h4>
         <div v-for="(it, i) in d.outcomes" :key="'o' + i" class="item">
           <span class="what">
             <span class="phase">{{ t('print.groups') }} · {{ t('group.title', { letter: GROUP_LETTERS[it.group] }) }}</span>
@@ -89,7 +89,7 @@ function pairNames (group: number, pair: number): string {
 
       <!-- Marcador exacto -->
       <section v-if="d.exact.length" class="cat">
-        <h4>{{ t('scores.exact') }} <span class="sub">+{{ d.breakdown.marcadores }}</span></h4>
+        <h4>{{ t('scores.exact') }} <span class="sub">+{{ d.breakdown.exact }}</span></h4>
         <div v-for="(it, i) in d.exact" :key="'e' + i" class="item">
           <span class="what">
             <span class="phase">{{ t('print.groups') }} · {{ t('group.title', { letter: GROUP_LETTERS[it.group] }) }}</span>

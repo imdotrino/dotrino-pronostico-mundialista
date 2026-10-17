@@ -95,7 +95,7 @@ export class RoomSync {
       void this.broadcastMine()   // lo MÍO: online ahora, o encolado 24 h
       void this.requestPredictions()
     } catch (e) {
-      console.warn('No se pudo publicar/listar el canal de la sala:', e)
+      console.warn('could not publish/list the room channel:', e)
       this.handlers.onStatus?.(c.isConnected ? 'online' : 'offline')
     }
   }
@@ -142,24 +142,24 @@ export class RoomSync {
    * claro. Se queda fuera y se avisa.
    */
   private async sealedTo (pubkeys: string[], msg: RoomMsg): Promise<Set<string>> {
-    const fallaron = new Set<string>()
-    if (!pubkeys.length) return fallaron
+    const failed = new Set<string>()
+    if (!pubkeys.length) return failed
     const c = getProxyClient()
     for (const pk of pubkeys) {
       try {
         await c.sendSealed(pk, msg)
       } catch (e: any) {
         const code = e?.code || 'unknown'
-        fallaron.add(pk)
+        failed.add(pk)
         this.handlers.onUnreachable?.(pk, code)
-        console.warn('no se pudo sellar para un miembro de la sala (' + code + '): no se manda en claro')
+        console.warn('could not seal for a room member (' + code + '): not sending it in clear')
       }
     }
-    return fallaron
+    return failed
   }
 
   /** Firma barata del conjunto de sobres: dice si tengo algo distinto que contar. */
-  private static firma (envs: string[]): string {
+  private static fingerprint (envs: string[]): string {
     let h = 5381
     for (const e of [...envs].sort()) for (let i = 0; i < e.length; i++) h = ((h << 5) + h + e.charCodeAt(i)) | 0
     return envs.length + ':' + (h >>> 0).toString(36)
@@ -184,13 +184,13 @@ export class RoomSync {
     const envs = (this.handlers.allEnvelopes?.() ?? []).filter(Boolean)
     if (this.myEnv && !envs.includes(this.myEnv)) envs.push(this.myEnv)
     if (!envs.length) return
-    const firma = RoomSync.firma(envs)
-    const objetivo = pubkeys.filter((pk) => this.lastRelay.get(pk) !== firma)
-    if (!objetivo.length) return
-    const fallaron = new Set<string>()
-    for (const env of envs) for (const pk of await this.sendEnv(objetivo, env)) fallaron.add(pk)
+    const fingerprint = RoomSync.fingerprint(envs)
+    const targets = pubkeys.filter((pk) => this.lastRelay.get(pk) !== fingerprint)
+    if (!targets.length) return
+    const failed = new Set<string>()
+    for (const env of envs) for (const pk of await this.sendEnv(targets, env)) failed.add(pk)
     // Solo se apunta a quien LE LLEGÓ: al que falló hay que volver a intentárselo.
-    for (const pk of objetivo) if (!fallaron.has(pk)) this.lastRelay.set(pk, firma)
+    for (const pk of targets) if (!failed.has(pk)) this.lastRelay.set(pk, fingerprint)
   }
 
   private requestPredictions (pubkeys: string[] = this.members()) {

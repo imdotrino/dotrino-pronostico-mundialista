@@ -119,7 +119,7 @@ async function loadReps () {
 }
 const pct = (v: number | null | undefined): number | null => (v == null ? null : Math.round(v * 100))
 const repPct = (pk: string): number | null => pct(repByPubkey.value[pk]?.confianza)
-const afinPct = (pk: string): number | null => pct(repByPubkey.value[pk]?.afinidad)
+const affinityPct = (pk: string): number | null => pct(repByPubkey.value[pk]?.afinidad)
 onMounted(loadReps)
 watch(() => props.room.members.map((m) => m.publickey).join(), loadReps)
 
@@ -177,7 +177,7 @@ function onProfileRate () { repByPubkey.value = {}; loadReps() }
               <span v-if="r.member.via" class="via">↪ {{ t('rooms.contributedBy', { n: r.member.via === myPubkey ? t('rooms.you2') : (r.member.viaNick || shortKey(r.member.via)) }) }}</span>
               <span class="mono">{{ shortKey(r.member.publickey) }}</span>
               <span v-if="!r.isMe && repPct(r.member.publickey) != null" class="rep" title="Confianza (ponderada por tu web-of-trust)">{{ repPct(r.member.publickey) }}%</span>
-              <span v-if="!r.isMe && afinPct(r.member.publickey) != null" class="rep afin" title="Afinidad de tu red">♥{{ afinPct(r.member.publickey) }}%</span>
+              <span v-if="!r.isMe && affinityPct(r.member.publickey) != null" class="rep afin" title="Afinidad de tu red">♥{{ affinityPct(r.member.publickey) }}%</span>
               <button v-if="r.member.via === myPubkey" class="rm-fwd" @click.stop="askRemoveForward(r.member)">
                 {{ removePending === r.member.publickey ? t('rooms.removeFriendSure') : t('rooms.removeFriend') }}
               </button>

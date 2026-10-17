@@ -78,7 +78,7 @@ test('ciclo de sellado: sellar → editar (obsoleto) → cancelar edición recup
   expect(signer.count()).toBe(1)
 
   // Editar: elegir un ganador en las llaves cambia el código → sello obsoleto.
-  await page.getByTestId('tab-llaves').click()
+  await page.getByTestId('tab-bracket').click()
   const side = page.locator('.match .side.clickable').first()
   await side.click()
   await expect(bar).toHaveClass(/stale/)
@@ -94,7 +94,7 @@ test('ciclo de sellado: sellar → editar (obsoleto) → cancelar edición recup
   await expect(page.getByTestId('seal-bar')).toHaveClass(/sealed/, { timeout: 10000 })
 
   // Editar de nuevo y RE-sellar: pide un sello nuevo al sellador.
-  await page.getByTestId('tab-llaves').click()
+  await page.getByTestId('tab-bracket').click()
   await page.locator('.match .side.clickable').first().click()
   await expect(page.getByTestId('seal-bar')).toHaveClass(/stale/)
   await sealFromBar(page)

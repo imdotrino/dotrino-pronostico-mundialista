@@ -37,7 +37,7 @@ export function getCloudStore (): Promise<InstanceType<typeof Store> | null> {
         // todavía (pendiente en @dotrino/identity): de ahí el cast.
         return Store.connect({ identity: identity as unknown as NonNullable<Parameters<typeof Store.connect>[0]>['identity'], adoptCommon: [THREAD_PREDICTIONS, THREAD_ROOMS] })
       })
-      .catch((e) => { console.warn('Store del ecosistema inalcanzable:', e); return null })
+      .catch((e) => { console.warn('ecosystem store unreachable:', e); return null })
   }
   return _storePromise
 }
@@ -66,7 +66,7 @@ export async function pullThread<T> (thread: string): Promise<T[]> {
       if (rec.data != null) out.push(rec.data)
     }
     return out
-  } catch (e) { console.warn('pullThread falló:', e); return [] }
+  } catch (e) { console.warn('pullThread failed:', e); return [] }
 }
 
 /**
@@ -83,13 +83,13 @@ export async function syncThread<T> (thread: string, records: CloudRecord<T>[]):
     const prev = snap.get(r.id)
     if (prev === undefined || r.ts > prev) {
       try { await store.appendMessage(thread, { id: r.id, ts: r.ts, data: r.data } as never); snap.set(r.id, r.ts) }
-      catch (e) { console.warn('appendMessage falló:', e) }
+      catch (e) { console.warn('appendMessage failed:', e) }
     }
   }
   for (const id of [...snap.keys()]) {
     if (!currentIds.has(id)) {
       try { await store.removeMessage(thread, id); snap.delete(id) }
-      catch (e) { console.warn('removeMessage falló:', e) }
+      catch (e) { console.warn('removeMessage failed:', e) }
     }
   }
 }

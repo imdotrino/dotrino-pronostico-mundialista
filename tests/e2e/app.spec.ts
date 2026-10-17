@@ -24,33 +24,33 @@ async function createOwnPrediction (page: Page, mode: 'manual' | 'winlose' | 'sc
 
 test('la app carga y muestra las pestañas Grupos y Llaves', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByTestId('tab-grupos')).toBeVisible()
-  await expect(page.getByTestId('tab-llaves')).toBeVisible()
+  await expect(page.getByTestId('tab-groups')).toBeVisible()
+  await expect(page.getByTestId('tab-bracket')).toBeVisible()
 })
 
 test('el tipo elegido al crear define si hay pestaña Resultados', async ({ page }) => {
   // Simple (manual): no existe la pestaña Resultados.
   await createOwnPrediction(page, 'manual')
-  await expect(page.getByTestId('tab-resultados')).toHaveCount(0)
+  await expect(page.getByTestId('tab-results')).toHaveCount(0)
 
   // Medio (winlose): aparece la pestaña Resultados.
   await createOwnPrediction(page, 'winlose')
-  await expect(page.getByTestId('tab-resultados')).toBeVisible()
+  await expect(page.getByTestId('tab-results')).toBeVisible()
 
   // Completo (score): también tiene Resultados.
   await createOwnPrediction(page, 'score')
-  await expect(page.getByTestId('tab-resultados')).toBeVisible()
+  await expect(page.getByTestId('tab-results')).toBeVisible()
 })
 
 test('cambiar de pestaña funciona', async ({ page }) => {
   await createOwnPrediction(page, 'manual')
 
-  await expect(page.getByTestId('zone-grupos')).toBeVisible()
+  await expect(page.getByTestId('zone-groups')).toBeVisible()
 
-  await page.getByTestId('tab-llaves').click()
-  await expect(page.getByTestId('zone-llaves')).toBeVisible()
-  await expect(page.getByTestId('zone-grupos')).not.toBeVisible()
+  await page.getByTestId('tab-bracket').click()
+  await expect(page.getByTestId('zone-bracket')).toBeVisible()
+  await expect(page.getByTestId('zone-groups')).not.toBeVisible()
 
-  await page.getByTestId('tab-grupos').click()
-  await expect(page.getByTestId('zone-grupos')).toBeVisible()
+  await page.getByTestId('tab-groups').click()
+  await expect(page.getByTestId('zone-groups')).toBeVisible()
 })

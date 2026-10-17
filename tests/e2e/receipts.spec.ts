@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test'
 // URL del contenido, su nombre y el apodo de quien lo abrió, y el proxio no cifra. Aquí
 // el transporte es de mentira, así que lo que se comprueba es el CONTRATO — que se manda
 // por `sendSealed` y que sin la marca `sealed` no entra. El sellado de verdad, mirando el
-// cable, está en `sellado.spec.ts` y en la suite del propio paquete.
+// cable, está en `sealed-transport.spec.ts` y en la suite del propio paquete.
 
 test('acuse de apertura: report envía sobre y start dispara notificación con el link', async ({ page }) => {
   await page.goto('/')
@@ -61,14 +61,14 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
 
     // Simula la entrega al autor. Primero SIN sellar: no puede entrar.
     const env = sent[0]?.payload
-    const entrega = onMessage as ((f: string, p: unknown, m?: unknown) => void) | null
-    if (entrega) entrega('tok', env, { sealed: false })
-    const avisosTrasClaro = notifyCalls.length
-    if (entrega) entrega('tok', env, { sealed: true })
+    const deliver = onMessage as ((f: string, p: unknown, m?: unknown) => void) | null
+    if (deliver) deliver('tok', env, { sealed: false })
+    const notifiesAfterClear = notifyCalls.length
+    if (deliver) deliver('tok', env, { sealed: true })
 
     return {
       reported,
-      avisosTrasClaro,
+      notifiesAfterClear,
       sentTo: sent[0]?.pk,
       env,
       notifyCount: notifyCalls.length,
@@ -79,7 +79,7 @@ test('acuse de apertura: report envía sobre y start dispara notificación con e
   expect(r.reported).toBe(true)
   expect(r.sentTo).toBe('PK_A')
   // Sellar solo de salida no serviría: lo que llega en claro se descarta.
-  expect(r.avisosTrasClaro).toBe(0)
+  expect(r.notifiesAfterClear).toBe(0)
   // Sobre estándar identificado.
   const env = r.env as Record<string, unknown>
   expect(env.__ccn).toBe(1)

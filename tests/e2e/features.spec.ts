@@ -19,7 +19,7 @@ async function newPrediction (page: Page, mode: 'manual' | 'winlose' | 'score'):
 test('crear pide el tipo y queda fijo (Completo abre Resultados)', async ({ page }) => {
   await newPrediction(page, 'score')
   // En modo con marcador existe la pestaña Resultados.
-  await expect(page.getByTestId('tab-resultados')).toBeVisible()
+  await expect(page.getByTestId('tab-results')).toBeVisible()
   // El selector de modo ya no permite cambiar el tipo: no hay botones de modo.
   await expect(page.getByTestId('mode-winlose')).toHaveCount(0)
 })
@@ -27,7 +27,7 @@ test('crear pide el tipo y queda fijo (Completo abre Resultados)', async ({ page
 test('clonar a otro tipo crea un nuevo pronóstico con ese tipo', async ({ page }) => {
   await newPrediction(page, 'manual')
   // En Simple no hay pestaña Resultados.
-  await expect(page.getByTestId('tab-resultados')).toHaveCount(0)
+  await expect(page.getByTestId('tab-results')).toHaveCount(0)
 
   // Clonar a Completo desde las acciones de la barra (modo + alcance).
   await page.getByTestId('bar-clone').click()
@@ -36,7 +36,7 @@ test('clonar a otro tipo crea un nuevo pronóstico con ese tipo', async ({ page 
   await page.getByTestId('scope-all').click()
 
   // El clon (Completo) queda activo: aparece la pestaña Resultados.
-  await expect(page.getByTestId('tab-resultados')).toBeVisible()
+  await expect(page.getByTestId('tab-results')).toBeVisible()
   // Hay al menos 2 pronósticos propios en la barra lateral (original + clon).
   const mine = page.getByTestId('sb-section-mine').getByTestId('pred-item')
   await expect(mine).toHaveCount(2)

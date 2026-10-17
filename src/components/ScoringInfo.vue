@@ -46,7 +46,7 @@ const tab = ref<Tab>('simple')
       <section class="block">
         <h4>{{ t('scoring.positionsTitle') }}</h4>
         <i18n-t keypath="scoring.positionsText" tag="p" scope="global">
-          <template #pts><span class="pts">+{{ SCORING.posicion }}</span></template>
+          <template #pts><span class="pts">+{{ SCORING.position }}</span></template>
         </i18n-t>
       </section>
 
@@ -58,7 +58,7 @@ const tab = ref<Tab>('simple')
           <li><span>{{ t('scoring.roundR16') }}</span><span class="pts">+{{ SCORING.r16 }}</span></li>
           <li><span>{{ t('scoring.roundQF') }}</span><span class="pts">+{{ SCORING.qf }}</span></li>
           <li><span>{{ t('scoring.roundSF') }}</span><span class="pts">+{{ SCORING.sf }}</span></li>
-          <li><span>{{ t('scoring.roundThird') }}</span><span class="pts">+{{ SCORING.tercero }}</span></li>
+          <li><span>{{ t('scoring.roundThird') }}</span><span class="pts">+{{ SCORING.thirdPlace }}</span></li>
           <li class="big"><span>{{ t('scoring.roundFinal') }}</span><span class="pts">+{{ SCORING.final }}</span></li>
         </ul>
       </section>
@@ -67,7 +67,7 @@ const tab = ref<Tab>('simple')
       <section v-if="tab !== 'simple'" class="block">
         <h4>{{ t('scoring.matchTitle') }}</h4>
         <i18n-t keypath="scoring.matchText" tag="p" scope="global">
-          <template #pts><span class="pts">+{{ SCORING.resultado }}</span></template>
+          <template #pts><span class="pts">+{{ SCORING.outcome }}</span></template>
         </i18n-t>
       </section>
 
@@ -75,9 +75,9 @@ const tab = ref<Tab>('simple')
       <section v-if="tab === 'completo'" class="block extra">
         <h4>{{ t('scoring.exactTitle') }}</h4>
         <i18n-t keypath="scoring.exactText" tag="p" scope="global">
-          <template #pts><span class="pts">+{{ SCORING.marcadorExacto }}</span></template>
+          <template #pts><span class="pts">+{{ SCORING.exactScore }}</span></template>
         </i18n-t>
-        <p class="ej">{{ t('scoring.exactExample', { pts: SCORING.marcadorExacto }) }}</p>
+        <p class="ej">{{ t('scoring.exactExample', { pts: SCORING.exactScore }) }}</p>
       </section>
       <p v-else class="no-extra">
         {{ t('scoring.noExtra', { mode: tab === 'simple' ? t('modes.simple') : t('modes.medium') }) }}

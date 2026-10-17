@@ -133,7 +133,7 @@ export async function sealPredictionCode (code: string): Promise<PredictionSeal 
  */
 export async function buildShareUrl (code: string, name?: string, presetSeal?: PredictionSeal | null): Promise<{ url: string; publickey: string; nickname?: string; seal: PredictionSeal | null }> {
   const id = await getIdentity()
-  if (!id) throw new Error('No se pudo conectar a la identidad (id.dotrino.com).')
+  if (!id) throw new Error('could not connect to the identity (id.dotrino.com)')
 
   const { signature, publickey } = await id.signData(code)
   const jwk = JSON.parse(publickey) as { x: string; y: string }
@@ -260,7 +260,7 @@ export async function parseShareFragment (frag: string): Promise<IncomingPredict
 //   [0] versión · [1..65) firma · [65] prefijo · [66..98) X · [98..100) len · [+] contenido utf8
 export async function signBlob (content: string, version: number): Promise<{ blob: string; publickey: string; nickname?: string }> {
   const id = await getIdentity()
-  if (!id) throw new Error('No se pudo conectar a la identidad (id.dotrino.com).')
+  if (!id) throw new Error('could not connect to the identity (id.dotrino.com)')
   const { signature, publickey } = await id.signData(content)
   const jwk = JSON.parse(publickey) as { x: string; y: string }
   const sig = b64ToBytes(signature)

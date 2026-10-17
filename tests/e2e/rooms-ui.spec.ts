@@ -72,5 +72,5 @@ test('el botón Resultados de la barra de Salas lleva a simular puntajes', async
   await resultsBtn.click()
 
   // Cambia a la sección de pronósticos, en la pestaña Resultados (para simular).
-  await expect(page.locator('[data-testid="zone-resultados"]')).toBeVisible()
+  await expect(page.locator('[data-testid="zone-results"]')).toBeVisible()
 })

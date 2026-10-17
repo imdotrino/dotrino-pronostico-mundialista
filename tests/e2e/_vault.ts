@@ -10,7 +10,7 @@
 // `@dotrino/identity` —ECDSA P-256 para firmar, ECDH P-256 + AES-GCM para cifrar—, con
 // las llaves generadas en el navegador.
 //
-// `llaves()` sirve para el caso en que la MISMA persona tiene que volver en otra pestaña
+// `makeKeys()` sirve para el caso en que la MISMA persona tiene que volver en otra pestaña
 // (apagarse y encenderse): sin llaves fijas sería otra identidad.
 
 import type { BrowserContext } from '@playwright/test'
@@ -24,7 +24,7 @@ export interface VaultKeys {
 }
 
 /** Llaves fijas para una identidad que tiene que sobrevivir a cerrar la pestaña. */
-export async function llaves (): Promise<VaultKeys> {
+export async function makeKeys (): Promise<VaultKeys> {
   const s = await crypto.subtle.generateKey(SIG, true, ['sign', 'verify'])
   const e = await crypto.subtle.generateKey(ECDH, true, ['deriveBits'])
   return {
@@ -109,15 +109,15 @@ window.__TEST_VAULT_PROMISE__ = (async () => {
 
 /** EL ESPÍA DEL CABLE: cada frame que sube y cada uno que baja, tal cual. */
 export const wireInit = `
-window.__CABLE__ = [];
+window.__WIRE__ = [];
 (() => {
   const Real = window.WebSocket;
   class Espia extends Real {
     constructor (...a) {
       super(...a);
-      this.addEventListener('message', (e) => { try { window.__CABLE__.push(String(e.data)) } catch (_) {} });
+      this.addEventListener('message', (e) => { try { window.__WIRE__.push(String(e.data)) } catch (_) {} });
     }
-    send (t) { try { window.__CABLE__.push(String(t)) } catch (_) {}; return super.send(t); }
+    send (t) { try { window.__WIRE__.push(String(t)) } catch (_) {}; return super.send(t); }
   }
   Espia.OPEN = Real.OPEN; Espia.CLOSED = Real.CLOSED;
   window.WebSocket = Espia;

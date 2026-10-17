@@ -60,7 +60,7 @@ const { t, locale } = useI18n()
 const library = ref<SavedPrediction[]>([])
 const activeId = ref<string | null>(null)
 const pred = reactive<Prediction>(defaultPrediction())
-const tab = ref<'grupos' | 'resultados' | 'llaves' | 'puntajes'>('grupos')
+const tab = ref<'groups' | 'results' | 'bracket' | 'scores'>('groups')
 // El sidebar arranca CERRADO: en móvil (cajón) no tapa la vista al entrar y se
 // abre con el botón ☰; en escritorio es barra fija y este flag no afecta el layout.
 const sidebarOpen = ref(false)
@@ -145,15 +145,15 @@ function scopeDisabled (s: Scope): boolean {
 }
 // Pestañas válidas según el alcance del pronóstico activo.
 function tabAllowed (target: Tab): boolean {
-  if (target === 'resultados') return pred.mode !== 'manual' && pred.scope !== 'bracket'
-  if (target === 'llaves') return pred.scope !== 'groups'
-  if (target === 'grupos') return pred.scope !== 'bracket'
+  if (target === 'results') return pred.mode !== 'manual' && pred.scope !== 'bracket'
+  if (target === 'bracket') return pred.scope !== 'groups'
+  if (target === 'groups') return pred.scope !== 'bracket'
   return true // puntajes
 }
 // Primera pestaña a mostrar para un (modo, scope) recién creado/seleccionado.
 function defaultTab (mode: GameMode, scope: Scope): Tab {
-  if (scope === 'bracket') return 'llaves'
-  return mode === 'manual' ? 'grupos' : 'resultados'
+  if (scope === 'bracket') return 'bracket'
+  return mode === 'manual' ? 'groups' : 'results'
 }
 
 // ¿Hay resultados sin confirmar? (solo aplica en winlose/score). Reactivo: el
@@ -409,7 +409,7 @@ function maybeShowDailyPopup () {
 
 // Cambio de pestaña con guarda: si hay cambios sin aplicar (afectan las llaves),
 // se pregunta si aplicarlos o ignorarlos antes de cambiar de sección.
-type Tab = 'grupos' | 'resultados' | 'llaves' | 'puntajes'
+type Tab = 'groups' | 'results' | 'bracket' | 'scores'
 const tabSwitch = ref<Tab | null>(null)
 function goTab (target: Tab) {
   if (target === tab.value) return
@@ -803,7 +803,7 @@ function select (id: string) {
     : pred.groupOrder.map((a) => [...a])
   pred.draftThirdsRank = entry.draftThirdsRank ? [...entry.draftThirdsRank] : [...pred.thirdsRank]
   // El oficial siempre en modo marcador, alcance completo y abriendo en "Resultados".
-  if (entry.official) { pred.mode = 'score'; pred.scope = 'all'; tab.value = 'resultados' }
+  if (entry.official) { pred.mode = 'score'; pred.scope = 'all'; tab.value = 'results' }
   // Si la pestaña activa no aplica al (modo, scope) elegido, caemos a una válida.
   else if (!tabAllowed(tab.value)) tab.value = defaultTab(pred.mode, pred.scope)
   // Nota: NO cerramos el sidebar aquí. select() corre también al montar
@@ -1088,7 +1088,7 @@ async function doImport () {
       saveLibrary(library.value)
       select(entry.id)
     }
-    tab.value = 'llaves'
+    tab.value = 'bracket'
     importOpen.value = false
     importText.value = ''
   } catch (e: unknown) {
@@ -1167,7 +1167,7 @@ function openOfficialResults () {
   const off = officialEntry.value
   if (off) select(off.id)
   section.value = 'predictions'
-  tab.value = 'resultados'
+  tab.value = 'results'
   sidebarOpen.value = false
 }
 
@@ -1200,14 +1200,14 @@ async function importFromHash (frag: string): Promise<boolean> {
     if (parsed.name && !existing.mine) existing.name = parsed.name
     if (adoptIncomingSeal(existing, parsed, isMine)) saveLibrary(library.value)
     select(existing.id)
-    tab.value = 'llaves'
+    tab.value = 'bracket'
     return true
   }
   const entry = buildIncomingEntry(parsed, frag, isMine)
   library.value.push(entry)
   saveLibrary(library.value)
   select(entry.id)
-  tab.value = 'llaves'
+  tab.value = 'bracket'
   return true
 }
 
@@ -1476,19 +1476,19 @@ onUnmounted(() => {
     </div>
 
     <nav class="tabs">
-      <button v-if="tabAllowed('grupos')" data-testid="tab-grupos" :class="{ active: tab === 'grupos' }" @click="goTab('grupos')">{{ t('tabs.groups') }}</button>
-      <button v-if="tabAllowed('llaves')" data-testid="tab-llaves" :class="{ active: tab === 'llaves' }" @click="goTab('llaves')">{{ t('tabs.bracket') }}</button>
+      <button v-if="tabAllowed('groups')" data-testid="tab-groups" :class="{ active: tab === 'groups' }" @click="goTab('groups')">{{ t('tabs.groups') }}</button>
+      <button v-if="tabAllowed('bracket')" data-testid="tab-bracket" :class="{ active: tab === 'bracket' }" @click="goTab('bracket')">{{ t('tabs.bracket') }}</button>
       <button
-        v-if="tabAllowed('resultados')"
-        data-testid="tab-resultados"
-        :class="{ active: tab === 'resultados' }"
-        @click="goTab('resultados')"
+        v-if="tabAllowed('results')"
+        data-testid="tab-results"
+        :class="{ active: tab === 'results' }"
+        @click="goTab('results')"
       >{{ t('tabs.results') }}</button>
       <button
         v-if="!isOfficial"
-        data-testid="tab-puntajes"
-        :class="{ active: tab === 'puntajes' }"
-        @click="goTab('puntajes')"
+        data-testid="tab-scores"
+        :class="{ active: tab === 'scores' }"
+        @click="goTab('scores')"
       >{{ t('tabs.scores') }}</button>
     </nav>
     </template>
@@ -1504,7 +1504,7 @@ onUnmounted(() => {
         @reseal="onDailyReseal"
       />
       <template v-else>
-      <section v-show="tab === 'grupos'" class="scrolly" data-testid="zone-grupos">
+      <section v-show="tab === 'groups'" class="scrolly" data-testid="zone-groups">
         <!-- Modo manual: tablas arrastrables (comportamiento clásico). -->
         <template v-if="pred.mode === 'manual'">
           <p class="tab-hint">
@@ -1540,7 +1540,7 @@ onUnmounted(() => {
         </template>
       </section>
 
-      <section v-show="tab === 'resultados' && pred.mode !== 'manual'" class="scrolly" data-testid="zone-resultados">
+      <section v-show="tab === 'results' && pred.mode !== 'manual'" class="scrolly" data-testid="zone-results">
         <ResultsTab
           :pred="pred"
           :readonly="readonly"
@@ -1556,11 +1556,11 @@ onUnmounted(() => {
         />
       </section>
 
-      <section v-show="tab === 'llaves'" data-testid="zone-llaves">
+      <section v-show="tab === 'bracket'" data-testid="zone-bracket">
         <BracketTab :pred="pred" :readonly="readonly || isOfficial" :official="isOfficial ? null : officialEntry" />
       </section>
 
-      <section v-show="tab === 'puntajes'" class="scrolly" data-testid="zone-puntajes">
+      <section v-show="tab === 'scores'" class="scrolly" data-testid="zone-scores">
         <ScoresTab :entry="activeEntry" :official="officialEntry" />
       </section>
       </template>

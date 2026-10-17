@@ -58,7 +58,7 @@ async function contribute (page, who) {
     await page.waitForSelector('.mine-note', { timeout: 15000 })
   } catch (e) {
     const err = await page.locator('.contribute .err').textContent().catch(() => null)
-    console.log(`[${who}] mine-note no apareció. contribError =`, JSON.stringify(err))
+    console.log(`[${who}] mine-note did not appear. contribError =`, JSON.stringify(err))
     await page.screenshot({ path: `${OUT}/debug-${who}.png`, fullPage: true })
     throw e
   }
@@ -95,29 +95,29 @@ try {
 
   await openRoomsSection(A)
   await openRoomsSection(B)
-  console.log('ambos en la sala; esperando descubrimiento de peers…')
+  console.log('both in the room; waiting for peer discovery…')
   await A.waitForTimeout(5000) // conectar al proxy + listarse mutuamente
 
-  console.log('Ana aporta…')
+  console.log('Ana contributes…')
   await contribute(A, 'ana')
-  console.log('Beto aporta…')
+  console.log('Beto contributes…')
   await contribute(B, 'beto')
 
   await A.waitForTimeout(3500) // gossip
   await showMembers(A); await showMembers(B)
-  await shot(A, '1-ana-tras-aportar')
-  await shot(B, '2-beto-ve-a-ana')
+  await shot(A, '1-ana-after-contributing')
+  await shot(B, '2-beto-sees-ana')
 
-  console.log('Ana borra su aporte (tombstone firmado)…')
+  console.log('Ana deletes her contribution (signed tombstone)…')
   await A.click('.mine-actions button.danger')
   await A.waitForTimeout(3500) // propagación del tombstone
   await showMembers(B)
-  await shot(A, '3-ana-tras-borrar')
-  await shot(B, '4-beto-ya-no-ve-a-ana')
+  await shot(A, '3-ana-after-deleting')
+  await shot(B, '4-beto-no-longer-sees-ana')
 
-  console.log('OK; screenshots en', OUT)
+  console.log('OK; screenshots in', OUT)
 } catch (e) {
-  console.error('FALLO:', e && e.message)
+  console.error('FAILED:', e && e.message)
   process.exitCode = 1
 } finally {
   await browserA.close()

@@ -180,7 +180,7 @@ export function encodePrediction (p: Prediction): string {
 export function decodePrediction (code: string): Prediction {
   const r = new BitReader(b64urlToBytes(code))
   const version = r.read(4)
-  if (version !== 2 && version !== 3 && version !== 4) throw new Error(`Versión de código no soportada: ${version}`)
+  if (version !== 2 && version !== 3 && version !== 4) throw new Error(`unsupported code version: ${version}`)
   const p = defaultPrediction()
   // v2: sin modo ni scope (modo 'manual', scope 'all'). v3: modo, scope 'all'.
   // v4: modo + scope.

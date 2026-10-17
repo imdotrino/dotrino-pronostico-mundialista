@@ -73,7 +73,7 @@ async function identifyWithVault (c: WebSocketProxyClient) {
     // (los endpoints pueden rotar). Import dinámico para evitar ciclo de módulos.
     import('./notifications').then(m => m.ensureSubscribed()).catch(() => {})
   } catch (e) {
-    console.warn('identify (vault) falló:', e)
+    console.warn('identify (vault) failed:', e)
   }
 }
 
@@ -86,8 +86,8 @@ function setupHandlers (c: WebSocketProxyClient) {
   // Lo que llega sin sellar el pilar lo tira, y lo dice por aquí. Se deja visible en
   // vez de mudo: es el síntoma de que alguien enfrente tiene una versión vieja.
   c.on('error', (e: any) => {
-    if (e?.type === 'unsealed') console.warn('mensaje SIN SELLAR descartado:', e.reason)
-    else if (e?.type === 'encpub_announce_failed') console.warn('no se pudo anunciar la llave de cifrado (' + (e.code || 'sin code') + '): nadie podrá sellarnos nada', e.error)
+    if (e?.type === 'unsealed') console.warn('UNSEALED message dropped:', e.reason)
+    else if (e?.type === 'encpub_announce_failed') console.warn('could not announce the encryption key (' + (e.code || 'no code') + '): nobody will be able to seal anything to us', e.error)
   })
 }
 
@@ -99,7 +99,7 @@ export function ensureConnected (): Promise<WebSocketProxyClient> {
   setupHandlers(c)
   connecting = c.connect()
     .then(async () => { await identifyWithVault(c); return c })
-    .catch((e) => { console.warn('No se pudo conectar al proxy:', e); return c })
+    .catch((e) => { console.warn('could not connect to the proxy:', e); return c })
     .finally(() => { connecting = null })
   return connecting
 }

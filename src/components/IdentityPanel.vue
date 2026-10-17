@@ -21,8 +21,8 @@ async function toggleNotif () {
 const props = defineProps<{ open: boolean; focusPubkey?: string | null; focusNick?: string | null; requireNick?: boolean }>()
 const emit = defineEmits<{ close: []; changed: [] }>()
 
-type Tab = 'perfil' | 'contactos' | 'rankings'
-const tab = ref<Tab>('perfil')
+type Tab = 'profile' | 'contacts' | 'rankings'
+const tab = ref<Tab>('profile')
 
 const id = ref<IdentityInstance | null>(null)
 const unreachable = ref(false)
@@ -92,13 +92,13 @@ async function load () {
   unreachable.value = false
   myNick.value = inst.me?.nickname ?? ''
   // Si se exige apodo (para compartir), abrimos en Perfil.
-  if (props.requireNick) tab.value = 'perfil'
+  if (props.requireNick) tab.value = 'profile'
   await refresh()
   if (props.focusPubkey) {
     // Enfocados en un pubkey concreto (p.ej. el autor de un pronóstico firmado):
     // ya tenemos su clave pública, así que lo agregamos como contacto SIN token
     // y dejamos lista la pestaña de contactos para valorarlo.
-    tab.value = 'contactos'
+    tab.value = 'contacts'
     // Autollenamos el apodo con el que el autor firmó (viene en el link) y lo
     // dejamos visible en el formulario.
     if (props.focusNick) newNick.value = props.focusNick
@@ -211,8 +211,8 @@ async function removeContact (pk: string) {
       <h3>{{ t('identity.title') }}</h3>
 
       <nav class="ptabs">
-        <button :class="{ on: tab === 'perfil' }" @click="tab = 'perfil'">{{ t('identity.tabProfile') }}</button>
-        <button :class="{ on: tab === 'contactos' }" @click="tab = 'contactos'">{{ t('identity.tabContacts') }}</button>
+        <button :class="{ on: tab === 'profile' }" @click="tab = 'profile'">{{ t('identity.tabProfile') }}</button>
+        <button :class="{ on: tab === 'contacts' }" @click="tab = 'contacts'">{{ t('identity.tabContacts') }}</button>
         <button :class="{ on: tab === 'rankings' }" @click="tab = 'rankings'">{{ t('identity.tabRankings') }}</button>
       </nav>
 
@@ -225,7 +225,7 @@ async function removeContact (pk: string) {
            @dotrino/profile 0.10: sin él la tarjeta self es SOLO LECTURA y se
            rompería el onboarding "ponte un apodo" (ensureNick, para poder firmar
            al compartir). Las notificaciones push son propias de esta app: van debajo. -->
-      <section v-show="tab === 'perfil'" class="body">
+      <section v-show="tab === 'profile'" class="body">
         <p v-if="requireNick && !myNick" class="focus-note">{{ t('identity.requireNickShare') }}</p>
         <dotrino-profile
           v-if="!unreachable && myPubkey"
@@ -267,7 +267,7 @@ async function removeContact (pk: string) {
       </section>
 
       <!-- CONTACTOS -->
-      <section v-show="tab === 'contactos'" class="body">
+      <section v-show="tab === 'contacts'" class="body">
         <p v-if="focusPubkey" class="focus-note">{{ t('identity.authorNoToken') }}</p>
         <div class="add">
           <input

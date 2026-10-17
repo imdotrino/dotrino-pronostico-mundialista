@@ -90,7 +90,7 @@ export async function sendRoomInvites (targetPubkeys: string[], roomUrl: string)
     } catch (e: any) {
       const code = e?.code || 'unknown'
       out.failed.push({ pubkey: pk, code })
-      console.warn('no se pudo sellar la invitación (' + code + '): no se manda en claro')
+      console.warn('could not seal the invite (' + code + '): not sending it in clear')
     }
   }
   return out

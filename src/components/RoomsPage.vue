@@ -259,7 +259,7 @@ async function buildInvite () {
       id: room.id, name: room.name, mode: room.mode, scope: room.scope ?? 'free', sealedUntil: room.sealedUntil, createdAt: room.createdAt, daily: room.daily,
     })
     inviteUrl.value = url
-  } catch (e) { console.warn('No se pudo armar la invitación:', e) }
+  } catch (e) { console.warn('could not build the invite:', e) }
 }
 function toggleContact (pk: string) {
   const s = new Set(selectedContacts.value)
