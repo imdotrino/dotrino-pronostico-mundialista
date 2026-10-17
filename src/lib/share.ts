@@ -191,6 +191,20 @@ export interface IncomingPrediction {
 /** Sello crudo extraído del blob (antes de verificar). */
 interface RawSeal { ts: number; sig: Uint8Array; hash: string }
 
+/** ¿`sig` (ECDSA P-256, SHA-256) firma la forma canónica de `text` con `jwk`? */
+async function verifyCanonical (jwk: JsonWebKey, sig: Uint8Array, text: string): Promise<boolean> {
+  try {
+    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
+    return await crypto.subtle.verify(
+      { name: 'ECDSA', hash: { name: 'SHA-256' } }, key,
+      sig as BufferSource, canonicalBytes(text) as BufferSource,
+    )
+  } catch (e) {
+    console.warn('signature check failed:', e)
+    return false
+  }
+}
+
 async function verifyAndBuild (
   code: string,
   sig: Uint8Array,
@@ -199,14 +213,7 @@ async function verifyAndBuild (
   name?: string,
   rawSeal?: RawSeal | null,
 ): Promise<IncomingPrediction> {
-  let verified = false
-  try {
-    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
-    verified = await crypto.subtle.verify(
-      { name: 'ECDSA', hash: { name: 'SHA-256' } }, key,
-      sig as BufferSource, canonicalBytes(code) as BufferSource,
-    )
-  } catch (e) { console.warn('Verificación de firma falló:', e) }
+  const verified = await verifyCanonical(jwk, sig, code)
   const out: IncomingPrediction = { code, verified, nickname, name, publickey: JSON.stringify(jwk) }
   if (rawSeal) {
     out.sealedAt = rawSeal.ts
@@ -298,14 +305,7 @@ export async function verifyBlob (frag: string, version: number): Promise<Verifi
     const content = new TextDecoder().decode(bytes.slice(pos, pos + len))
     const yBytes = decompressY(xBytes, prefix === 0x03)
     const jwk = { kty: 'EC', crv: 'P-256', x: bytesToB64url(xBytes), y: bytesToB64url(yBytes), ext: true }
-    let verified = false
-    try {
-      const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
-      verified = await crypto.subtle.verify(
-        { name: 'ECDSA', hash: { name: 'SHA-256' } }, key,
-        sig as BufferSource, canonicalBytes(content) as BufferSource,
-      )
-    } catch (e) { console.warn('verifyBlob falló:', e) }
+    const verified = await verifyCanonical(jwk, sig, content)
     return { content, verified, publickey: JSON.stringify(jwk) }
   } catch { return null }
 }
