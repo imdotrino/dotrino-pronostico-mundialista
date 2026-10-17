@@ -35,7 +35,7 @@ const PAYLOAD_VERSION_SEALED = 2
 // ---- base64 / base64url ----------------------------------------------------
 
 export { b64ToBytes, b64urlToBytes, bytesToB64url } from './bytes'
-import { b64ToBytes, b64urlToBytes, bytesToB64url } from './bytes'
+import { b64ToBytes, b64urlToBytes, bytesToB64url, verifyEcdsa } from './bytes'
 
 // El vault firma canonicalStringify(data); para un string eso es
 // JSON.stringify(string). Lo replicamos para verificar.
@@ -192,17 +192,8 @@ export interface IncomingPrediction {
 interface RawSeal { ts: number; sig: Uint8Array; hash: string }
 
 /** ¿`sig` (ECDSA P-256, SHA-256) firma la forma canónica de `text` con `jwk`? */
-async function verifyCanonical (jwk: JsonWebKey, sig: Uint8Array, text: string): Promise<boolean> {
-  try {
-    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
-    return await crypto.subtle.verify(
-      { name: 'ECDSA', hash: { name: 'SHA-256' } }, key,
-      sig as BufferSource, canonicalBytes(text) as BufferSource,
-    )
-  } catch (e) {
-    console.warn('signature check failed:', e)
-    return false
-  }
+function verifyCanonical (jwk: JsonWebKey, sig: Uint8Array, text: string): Promise<boolean> {
+  return verifyEcdsa(jwk, sig, canonicalBytes(text))
 }
 
 async function verifyAndBuild (

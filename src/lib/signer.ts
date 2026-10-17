@@ -9,7 +9,7 @@
 // el par { hash, ts }, y como el autor no controla esa clave, no puede falsear
 // la fecha. El sellador solo ve el hash, nunca el pronóstico.
 
-import { canonicalStringify, b64ToBytes, bytesToB64url } from './bytes'
+import { canonicalStringify, b64ToBytes, bytesToB64url, verifyEcdsa } from './bytes'
 export const SIGNER_URL = 'https://signer.dotrino.com'
 
 // Pubkey de producción del sellador, PINEADA: la confianza no depende de la
@@ -69,12 +69,6 @@ export async function requestSeal (hashB64url: string): Promise<PredictionSeal |
  * @returns true si la firma del sellador sobre { op:'seal', hash, ts } es válida.
  */
 export async function verifySeal (hashB64url: string, ts: number, sig: Uint8Array): Promise<boolean> {
-  try {
-    const jwk = JSON.parse(SIGNER_PUBKEY)
-    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
-    const bytes = new TextEncoder().encode(canonicalStringify({ op: 'seal', hash: hashB64url, ts }))
-    return await crypto.subtle.verify({ name: 'ECDSA', hash: { name: 'SHA-256' } }, key, sig as BufferSource, bytes as BufferSource)
-  } catch {
-    return false
-  }
+  const bytes = new TextEncoder().encode(canonicalStringify({ op: 'seal', hash: hashB64url, ts }))
+  return verifyEcdsa(JSON.parse(SIGNER_PUBKEY), sig, bytes)
 }

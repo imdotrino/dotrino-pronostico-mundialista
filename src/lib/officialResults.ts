@@ -19,7 +19,7 @@ import { R32, R16, QF, SF, THIRD_PLACE, FINAL } from './bracket'
 import { encodePrediction } from './codec'
 import { kickoffUTC } from './schedule'
 import type { IdentityInstance } from './identity'
-import { canonicalStringify, b64ToBytes } from './bytes'
+import { canonicalStringify, b64ToBytes, verifyEcdsa } from './bytes'
 
 // URL del relay y su pubkey de SERVICIO, PINEADA (la confianza no depende de la
 // pubkey que venga en el feed, sino de esta clave conocida — igual que el signer).
@@ -59,10 +59,7 @@ export async function verifyFeed (sf: SignedFeed): Promise<boolean> {
     if (!sf || !sf.data || typeof sf.signature !== 'string') return false
     // La confianza es la pubkey pineada; además exigimos que el feed la declare.
     if (sf.data.publickey !== RESULTS_PUBKEY) return false
-    const jwk = JSON.parse(RESULTS_PUBKEY)
-    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
-    const bytes = new TextEncoder().encode(canonicalStringify(sf.data))
-    return await crypto.subtle.verify({ name: 'ECDSA', hash: { name: 'SHA-256' } }, key, b64ToBytes(sf.signature) as BufferSource, bytes as BufferSource)
+    return await verifyEcdsa(JSON.parse(RESULTS_PUBKEY), b64ToBytes(sf.signature), new TextEncoder().encode(canonicalStringify(sf.data)))
   } catch { return false }
 }
 

@@ -25,3 +25,14 @@ export function canonicalStringify (v: unknown): string {
   const ks = Object.keys(v as Record<string, unknown>).sort()
   return '{' + ks.map((k) => JSON.stringify(k) + ':' + canonicalStringify((v as Record<string, unknown>)[k])).join(',') + '}'
 }
+
+/** ¿`sig` (ECDSA P-256, SHA-256) firma `data` con la pública `jwk`? Una llave o firma ilegible es `false`. */
+export async function verifyEcdsa (jwk: JsonWebKey, sig: Uint8Array, data: Uint8Array): Promise<boolean> {
+  try {
+    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
+    return await crypto.subtle.verify({ name: 'ECDSA', hash: { name: 'SHA-256' } }, key, sig as BufferSource, data as BufferSource)
+  } catch (e) {
+    console.warn('signature check failed:', e)
+    return false
+  }
+}
