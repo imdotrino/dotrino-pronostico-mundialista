@@ -71,7 +71,6 @@ async function membersTab (page: Page) {
   await page.waitForTimeout(400)
 }
 async function contribute (page: Page) {
-  page.on('dialog', (d) => d.accept())
   await page.click('.contribute .pick button.go')
   await page.waitForSelector('.mine-note', { timeout: 20000 })
 }
@@ -166,8 +165,10 @@ test('dos navegadores: aportar → sync por gossip → borrar (tombstone firmado
     await expect(B.locator('.lb .tbl tbody tr')).toHaveCount(2)
     await expect(A.locator('.lb .tbl tbody tr')).toHaveCount(2)
 
-    // Ana borra su aporte → tombstone firmado que se propaga.
+    // Ana borra su aporte → tombstone firmado que se propaga. La confirmación es el
+    // diálogo PROPIO de la app (CONVENCIONES §5), no un confirm() del navegador.
     await A.click('.mine-actions button.danger')
+    await A.getByTestId('dialog-ok').click()
     await A.waitForTimeout(4000)
     await membersTab(B)
     await shot(A, '3-ana-tras-borrar')

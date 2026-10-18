@@ -51,6 +51,7 @@ import { RoomInbox, type IncomingInvite } from './lib/inbox'
 import { startReceipts, reportOpen } from './lib/receipts'
 import { trackEvent } from './lib/analytics'
 import { useRooms } from './composables/useRooms'
+import { useDialog } from './composables/useDialog'
 import { startAppTutorial } from './lib/tutorial'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
@@ -86,6 +87,8 @@ useBackLayer(importOpen)
 // --- Salas (otra "página": barra lateral + contenido propio) ---------------
 const section = ref<'predictions' | 'rooms' | 'fecha'>('predictions')
 const inviteToast = ref<IncomingInvite | null>(null)
+// Diálogos propios (toast / confirmar / pedir texto) en vez de alert/confirm/prompt.
+const { toasts, dialog, notify, dismissToast, ask, askText, settleDialog } = useDialog()
 let inbox: RoomInbox | null = null
 const {
   rooms,
@@ -616,7 +619,7 @@ async function downloadPdf (url: string) {
     doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, 0, imgW, imgH)
     doc.save(sanitizeFilename(printTitle.value))
   } catch (e: unknown) {
-    alert(t('pdf.error') + (e instanceof Error ? e.message : ''))
+    notify(t('pdf.error') + (e instanceof Error ? e.message : ''))
   } finally {
     pdfCapturing.value = false
   }
@@ -644,7 +647,7 @@ async function pdfEntry (id: string) {
   try {
     await downloadPdf(await urlForEntry(entry))
   } catch (e: unknown) {
-    alert(t('pdf.error') + (e instanceof Error ? e.message : ''))
+    notify(t('pdf.error') + (e instanceof Error ? e.message : ''))
   }
 }
 
@@ -657,7 +660,7 @@ async function printEntry (id: string) {
   try {
     await handlePrint(await urlForEntry(entry))
   } catch (e: unknown) {
-    alert(t('pdf.printError') + (e instanceof Error ? e.message : ''))
+    notify(t('pdf.printError') + (e instanceof Error ? e.message : ''))
   }
 }
 
@@ -1027,10 +1030,10 @@ function pickScope (scope: Scope) {
   else if (p.id) cloneToType(p.id, p.mode, scope)
 }
 
-function remove (id: string) {
+async function remove (id: string) {
   const entry = library.value.find((p) => p.id === id)
   if (!entry || entry.daily) return // la entrada diaria es única por cuenta: no se borra
-  if (!confirm(t('store.confirmDelete', { name: entry.name }))) return
+  if (!await ask(t('store.confirmDelete', { name: entry.name }))) return
   library.value = library.value.filter((p) => p.id !== id)
   saveLibrary(library.value)
   if (activeId.value === id) {
@@ -1040,10 +1043,10 @@ function remove (id: string) {
   }
 }
 
-function rename (id: string) {
+async function rename (id: string) {
   const entry = library.value.find((p) => p.id === id)
   if (!entry) return
-  const name = prompt(t('store.promptRename'), entry.name)
+  const name = await askText(t('store.promptRename'), entry.name)
   if (name && name.trim()) { entry.name = name.trim(); saveLibrary(library.value) }
 }
 
@@ -1141,7 +1144,7 @@ async function handleHash (frag: string): Promise<boolean> {
 async function handleRoomInvite (frag: string): Promise<boolean> {
   history.replaceState(null, '', location.pathname + location.search)
   const id = await importRoomInvite(frag)
-  if (!id) { alert(t('rooms.invalidInvite')); return false }
+  if (!id) { notify(t('rooms.invalidInvite')); return false }
   section.value = 'rooms'
   openRoom(id)
   sidebarOpen.value = false
@@ -1152,8 +1155,8 @@ async function handleRoomInvite (frag: string): Promise<boolean> {
 async function handleMemberContrib (frag: string): Promise<boolean> {
   history.replaceState(null, '', location.pathname + location.search)
   const res = await importMemberContrib(frag)
-  if (res === 'NOROOM') { alert(t('rooms.needRoomFirst')); return false }
-  if (!res) { alert(t('rooms.contribInvalid')); return false }
+  if (res === 'NOROOM') { notify(t('rooms.needRoomFirst')); return false }
+  if (!res) { notify(t('rooms.contribInvalid')); return false }
   section.value = 'rooms'
   openRoom(res)
   sidebarOpen.value = false
@@ -1616,6 +1619,28 @@ onUnmounted(() => {
       </div>
     </div>
 
+    <!-- Mensajes de la app (reemplazan a alert()). -->
+    <div v-if="toasts.length" class="app-toasts" data-testid="app-toasts">
+      <div v-for="m in toasts" :key="m.id" class="invite-toast app-toast" role="status" data-testid="app-toast">
+        <span class="it-msg">{{ m.text }}</span>
+        <div class="it-actions">
+          <button class="it-ignore" data-testid="app-toast-close" @click="dismissToast(m.id)">{{ t('common.close') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmar / pedir texto (reemplazan a confirm() y prompt()). -->
+    <div v-if="dialog" class="overlay" @click.self="settleDialog(dialog.kind === 'prompt' ? null : false)">
+      <form class="warn-modal app-dialog" :data-testid="dialog.kind === 'prompt' ? 'prompt-modal' : 'confirm-modal'" @submit.prevent="settleDialog(dialog.kind === 'prompt' ? dialog.value : true)">
+        <p>{{ dialog.message }}</p>
+        <input v-if="dialog.kind === 'prompt'" v-model="dialog.value" class="dialog-input" data-testid="prompt-input" autofocus maxlength="60">
+        <div class="warn-actions">
+          <button type="button" class="warn-cancel" data-testid="dialog-cancel" @click="settleDialog(dialog.kind === 'prompt' ? null : false)">{{ t('common.cancel') }}</button>
+          <button type="submit" class="warn-go dialog-ok" data-testid="dialog-ok" :disabled="dialog.kind === 'prompt' && !dialog.value.trim()">{{ t('common.accept') }}</button>
+        </div>
+      </form>
+    </div>
+
     <!-- Cambios sin aplicar al cambiar de sección: aplicar o ignorar. -->
     <div v-if="tabSwitch" class="overlay" @click.self="tabSwitch = null">
       <div class="warn-modal" data-testid="tabswitch-modal">
@@ -2032,6 +2057,18 @@ onUnmounted(() => {
    a la derecha; "volver" queda al borde, a la derecha del botón de compartir.
    (Dos autos repartirían el espacio y dejarían "volver" al centro.) */
 .rooms-bar .bar-actions { margin-left: auto; }
+
+/* Toasts de la app (mensajes que antes eran alert()) */
+.app-toasts { position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%); z-index: 600; display: flex; flex-direction: column; gap: 0.5rem; max-width: 92vw; }
+.app-toasts .app-toast { position: static; transform: none; }
+/* Diálogo de confirmar / pedir texto */
+.app-dialog { border-color: var(--azure); }
+.app-dialog .dialog-ok { background: var(--azure); color: var(--dt-accent-ink); }
+.app-dialog .dialog-ok:disabled { opacity: 0.5; cursor: not-allowed; }
+.dialog-input {
+  width: 100%; margin-bottom: 1rem; padding: 0.55rem 0.7rem; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit;
+}
 
 /* Toast de invitación a sala (buzón en vivo) */
 .invite-toast {

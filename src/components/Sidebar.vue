@@ -6,6 +6,7 @@ import { scoreEntry } from '../lib/scoring'
 import { decodePrediction } from '../lib/codec'
 import { completeness } from '../lib/prediction'
 import { useRooms } from '../composables/useRooms'
+import { ask } from '../composables/useDialog'
 
 const { t } = useI18n()
 
@@ -72,8 +73,8 @@ function roomScopeTag (s?: string): string {
 function selectRoom (id: string) { openRoom(id); emit('close') }
 function onShareRoom (id: string) { shareRoom(id); emit('close') }
 function newRoom () { closeRoom(); emit('close') }
-function onLeaveRoom (id: string, name: string) {
-  if (confirm(t('rooms.confirmLeave', { name }))) leaveRoom(id)
+async function onLeaveRoom (id: string, name: string) {
+  if (await ask(t('rooms.confirmLeave', { name }))) leaveRoom(id)
 }
 const sortedRooms = computed(() => [...rooms.value].sort((a, b) => b.updatedAt - a.updatedAt))
 
@@ -159,8 +160,8 @@ const scores = computed<Record<string, number>>(() => {
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
               </svg>
             </button>
-            <button :title="t('common.rename')" @click.stop="emit('rename', p.id)">✎</button>
-            <button :title="t('common.delete')" @click.stop="emit('remove', p.id)">🗑</button>
+            <button :title="t('common.rename')" data-testid="pred-rename" @click.stop="emit('rename', p.id)">✎</button>
+            <button :title="t('common.delete')" data-testid="pred-delete" @click.stop="emit('remove', p.id)">🗑</button>
           </span>
         </div>
       </section>

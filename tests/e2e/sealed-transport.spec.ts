@@ -36,17 +36,30 @@ async function openPage (browser: Browser, nick: string, k: VaultKeys): Promise<
 
 /** Conecta al proxio con la identidad del vault de prueba y devuelve mi pubkey. */
 async function connect (page: Page): Promise<string> {
-  return page.evaluate(async () => {
-    const conn = await import('/src/lib/connection.ts')
-    await conn.ensureConnected()
-    // El anuncio de la llave sale POR DETRÁS del identify (no bloquea, a propósito).
-    for (let i = 0; i < 60 && !conn.getMyPublickey(); i++) await new Promise((r) => setTimeout(r, 100))
-    await new Promise((r) => setTimeout(r, 800))
-    const pk = conn.getMyPublickey()
-    if (!pk) throw new Error('could not identify against the proxy')
-    if (!conn.canSeal()) throw new Error('the client has nothing to seal with')
-    return pk
-  })
+  // Lo que la app diga por consola mientras se identifica va al error: sin esto un
+  // identify rechazado por el proxio se veía igual que uno que tarda.
+  const said: string[] = []
+  const onConsole = (m: { type: () => string; text: () => string }) => { if (m.type() !== 'log') said.push(m.text()) }
+  page.on('console', onConsole)
+  try {
+    return await page.evaluate(async () => {
+      const conn = await import('/src/lib/connection.ts')
+      await conn.ensureConnected()
+      // El anuncio de la llave sale POR DETRÁS del identify (no bloquea, a propósito).
+      // Contra el proxio REAL un identify puede tardar varios segundos (va firmado por
+      // la bóveda y la cola del proxio compite con lo que dejó el test anterior).
+      for (let i = 0; i < 200 && !conn.getMyPublickey(); i++) await new Promise((r) => setTimeout(r, 100))
+      await new Promise((r) => setTimeout(r, 800))
+      const pk = conn.getMyPublickey()
+      if (!pk) throw new Error('could not identify against the proxy')
+      if (!conn.canSeal()) throw new Error('the client has nothing to seal with')
+      return pk
+    })
+  } catch (e) {
+    throw new Error((e instanceof Error ? e.message : String(e)) + (said.length ? '\n  console: ' + said.join('\n  console: ') : ''))
+  } finally {
+    page.off('console', onConsole)
+  }
 }
 
 /**

@@ -5,6 +5,7 @@
 // modo NO es 'manual'. En solo lectura no se edita.
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ask } from '../composables/useDialog'
 import { GROUPS, teamById, GROUP_LETTERS } from '../lib/teams'
 import { GROUP_PAIRS, groupMatchIndex, teamAt, computeStandings, koWinnerSide, outcomeOf, type MatchResult, type Results } from '../lib/standings'
 import { resolveMatches, type Prediction, type ResolvedMatch } from '../lib/prediction'
@@ -280,9 +281,9 @@ function fillRandom (): void {
 }
 
 // Borra todos los resultados (con confirmación).
-function clearAll (): void {
+async function clearAll (): Promise<void> {
   if (props.readonly) return
-  if (!confirm(t('results.confirmClear'))) return
+  if (!await ask(t('results.confirmClear'))) return
   props.pred.results = {}
 }
 

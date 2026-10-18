@@ -9,6 +9,7 @@ import { buildRoomInviteUrl, buildMemberContribUrl, buildMemberEnvelope, buildRe
 import { dailySealsForEnvelope, findDailyEntry } from '../lib/matchday'
 import { sendRoomInvites } from '../lib/inbox'
 import { useRooms } from '../composables/useRooms'
+import { ask } from '../composables/useDialog'
 import { shortKey } from '../lib/rating'
 import RoomLeaderboard from './RoomLeaderboard.vue'
 import RoomCompare from './RoomCompare.vue'
@@ -170,7 +171,7 @@ async function doContribute (entry: SavedPrediction) {
 async function removeMyContrib () {
   const room = activeRoom.value
   if (!room || !myPubkey.value) return
-  if (!confirm(t('rooms.confirmRemoveContrib'))) return
+  if (!await ask(t('rooms.confirmRemoveContrib'))) return
   // Tombstone FIRMADO: solo yo puedo borrar lo mío, y al ir firmado con ts mayor
   // le gana a cualquier reenvío viejo de mi aporte (no se "revive").
   const env = await buildRetractEnvelope(room.id, Date.now())

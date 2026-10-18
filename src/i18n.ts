@@ -16,6 +16,7 @@ const es = {
   common: {
     close: 'Cerrar',
     cancel: 'Cancelar',
+    accept: 'Aceptar',
     save: 'Guardar',
     anonymous: 'anónimo',
     vs: 'vs',
@@ -489,6 +490,7 @@ const en: typeof es = {
   common: {
     close: 'Close',
     cancel: 'Cancel',
+    accept: 'OK',
     save: 'Save',
     anonymous: 'anonymous',
     vs: 'vs',
