@@ -11,7 +11,8 @@ import { shortKey } from '../lib/rating'
 import { TOURNAMENT_START } from '../lib/room'
 import { getReputation } from '../lib/reputation'
 import { getIdentity } from '../lib/identity'
-import { createVaultProfileProvider } from '@dotrino/profile'
+import { createVaultProfileProvider, type DotrinoProfile, type ProfileProvider } from '@dotrino/profile'
+import type { ComponentPublicInstance } from 'vue'
 import '@dotrino/profile'
 
 const { t, locale } = useI18n()
@@ -126,7 +127,7 @@ watch(() => props.room.members.map((m) => m.publickey).join(), loadReps)
 // --- Perfil del rival: tarjeta compartida <dotrino-profile> ---
 const profilePk = ref<string | null>(null)
 const profileName = ref('')
-let _provider: any = null
+let _provider: ProfileProvider | null = null
 async function ensureProvider () {
   if (_provider) return _provider
   const [identity, reputation] = await Promise.all([getIdentity(), getReputation()])
@@ -138,9 +139,10 @@ function openProfile (m: RoomMember) {
   profileName.value = m.nickname || ''
   profilePk.value = m.publickey
 }
-function bindProfile (el: any) {
-  if (!el) return
-  ensureProvider().then((p) => { if (p) el.provider = p })
+function bindProfile (el: Element | ComponentPublicInstance | null) {
+  if (!(el instanceof HTMLElement)) return
+  const profile = el as DotrinoProfile
+  ensureProvider().then((p) => { if (p) profile.provider = p })
 }
 function onProfileRate () { repByPubkey.value = {}; loadReps() }
 </script>

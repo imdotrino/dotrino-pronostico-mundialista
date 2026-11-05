@@ -14,6 +14,7 @@ await mkdir(iconsDir, { recursive: true })
 
 // El SVG está en mm a tamaño grande; rasterizamos sin tope de píxeles y
 // reescalamos a la medida final (contain, fondo transparente).
+/** @param {number} size lado del PNG en píxeles */
 function raster (size) {
   return sharp(src, { density: 200, limitInputPixels: false })
     .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })

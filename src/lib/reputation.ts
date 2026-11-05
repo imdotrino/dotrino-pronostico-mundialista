@@ -11,6 +11,6 @@ export async function getReputation () {
   if (_rep) return _rep
   const id = await getIdentity()
   if (!id) return null
-  _rep = createVaultReputation(id as any)
+  _rep = createVaultReputation(id)
   return _rep
 }

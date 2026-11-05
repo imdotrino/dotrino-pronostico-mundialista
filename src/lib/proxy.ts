@@ -12,6 +12,7 @@
 //      por la suya. Sin ella no se le podría sellar una invitación, y un contacto al que
 //      no se le puede escribir no sirve.
 import { ensureConnected } from './connection'
+import { errorCode, errorMessage } from './errors'
 
 export interface ResolveCodeResult {
   publickey: string
@@ -42,7 +43,7 @@ export async function resolveCodeToIdentity (code: string): Promise<ResolveCodeR
   if (!r.publickey) throw new ProxyTokenError('no-identity')
   try {
     return { publickey: r.publickey, encryptionPubkey: await c.encPubOf(r.publickey) }
-  } catch (e: any) {
-    throw new ProxyTokenError(e?.code || 'unknown', e?.message)
+  } catch (e) {
+    throw new ProxyTokenError(errorCode(e) || 'unknown', errorMessage(e))
   }
 }

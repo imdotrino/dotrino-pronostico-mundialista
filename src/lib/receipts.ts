@@ -19,6 +19,7 @@ import { createShareReceipts, type ShareReceipts } from '@dotrino/notifications'
 import { ensureConnected, getProxyClient } from './connection'
 import { getIdentity } from './identity'
 import { getNotificationsController } from './notifications'
+import { errorCode } from './errors'
 
 let _receipts: ShareReceipts | null = null
 
@@ -55,11 +56,11 @@ export async function reportOpen (toPubkey: string, url: string, name?: string):
   await ensureConnected()
   try {
     await receipts().report({ toPubkey, url, name })
-  } catch (e: any) {
+  } catch (e) {
     // No se traga: un acuse que no sale es normal (el autor puede no tener llave de
     // cifrado anunciada todavía), pero tiene que poder buscarse por su `code` — con la
     // frase no, que es lo que convierte «no tengo su llave» y «se cayó la red» en el
     // mismo misterio.
-    console.warn('open receipt not sent (' + (e?.code || 'no code') + '): not sending it in clear')
+    console.warn('open receipt not sent (' + (errorCode(e) || 'no code') + '): not sending it in clear')
   }
 }

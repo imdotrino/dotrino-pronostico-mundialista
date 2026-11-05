@@ -16,6 +16,7 @@
 
 import { ensureConnected, getProxyClient } from './connection'
 import { getIdentity } from './identity'
+import { errorCode, type MessageMeta } from './errors'
 
 export interface IncomingInvite { url: string; nick?: string }
 
@@ -46,7 +47,7 @@ export class RoomInbox {
     // `identify`, o sea DENTRO de `ensureConnected`: engancharse después es llegar tarde
     // a lo que se estaba esperando, y perderlo sin que nada lo diga.
     const c = getProxyClient()
-    this.off = c.on('message', (_from: string, payload: unknown, meta: any) => {
+    this.off = c.on('message', (_from: string, payload: unknown, meta: MessageMeta | undefined) => {
       // Sin la marca del pilar no entra. Una invitación en claro es una invitación que
       // pudo escribir cualquiera que mire el cable, y lleva a la sala que ella diga.
       if (!meta?.sealed) return
@@ -87,8 +88,8 @@ export async function sendRoomInvites (targetPubkeys: string[], roomUrl: string)
     try {
       await c.sendSealed(pk, { type: 'ROOM_INVITE', url: roomUrl, nick })
       out.sent++
-    } catch (e: any) {
-      const code = e?.code || 'unknown'
+    } catch (e) {
+      const code = errorCode(e) || 'unknown'
       out.failed.push({ pubkey: pk, code })
       console.warn('could not seal the invite (' + code + '): not sending it in clear')
     }

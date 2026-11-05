@@ -67,7 +67,7 @@ async function identifyWithVault (c: WebSocketProxyClient) {
     })
     sealingReady = true
     // El sobre lo arma el pilar (`identifyAs`), que le pone el destinatario.
-    await c.identifyAs({ publickey, sign: (d: any) => id.signData(d) })
+    await c.identifyAs({ publickey, sign: (d: object) => id.signData(d) })
     myPublickey = publickey
     // Si el usuario activó notificaciones, re-registrar la push subscription
     // (los endpoints pueden rotar). Import dinámico para evitar ciclo de módulos.
@@ -85,7 +85,7 @@ function setupHandlers (c: WebSocketProxyClient) {
   c.on('token', () => { identifyWithVault(c).catch(() => {}) })
   // Lo que llega sin sellar el pilar lo tira, y lo dice por aquí. Se deja visible en
   // vez de mudo: es el síntoma de que alguien enfrente tiene una versión vieja.
-  c.on('error', (e: any) => {
+  c.on('error', (e: { type?: string, reason?: string, code?: string, error?: unknown } | undefined) => {
     if (e?.type === 'unsealed') console.warn('UNSEALED message dropped:', e.reason)
     else if (e?.type === 'encpub_announce_failed') console.warn('could not announce the encryption key (' + (e.code || 'no code') + '): nobody will be able to seal anything to us', e.error)
   })

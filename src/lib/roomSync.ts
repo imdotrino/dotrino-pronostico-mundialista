@@ -28,6 +28,7 @@
 
 import type { WebSocketProxyClient } from '@dotrino/proxy-client'
 import { ensureConnected, getProxyClient } from './connection'
+import { errorCode, type MessageMeta } from './errors'
 
 const CHANNEL_PREFIX = 'mundial-room-'
 
@@ -148,8 +149,8 @@ export class RoomSync {
     for (const pk of pubkeys) {
       try {
         await c.sendSealed(pk, msg)
-      } catch (e: any) {
-        const code = e?.code || 'unknown'
+      } catch (e) {
+        const code = errorCode(e) || 'unknown'
         failed.add(pk)
         this.handlers.onUnreachable?.(pk, code)
         console.warn('could not seal for a room member (' + code + '): not sending it in clear')
@@ -198,7 +199,7 @@ export class RoomSync {
   }
 
   private registerHandlers (c: WebSocketProxyClient) {
-    this.offFns.push(c.on('message', (_from: string, payload: unknown, meta: any) => {
+    this.offFns.push(c.on('message', (_from: string, payload: unknown, meta: MessageMeta | undefined) => {
       // Lo que no viene sellado no existe. El cliente ya lo tira por `requireSealed`;
       // esta es la comprobación de la app, y solo mira la marca que deja el pilar —
       // abrir el sobre aquí también sería la segunda capa que hace que no lo abra nadie.
@@ -210,7 +211,7 @@ export class RoomSync {
       // cuanto aporta algo, el que lo recibe le devuelve todo lo que sabe. Se le contesta
       // a la IDENTIDAD, no a su token: el token no dice de quién es y sellar necesita
       // saberlo. Lo que se reenvía son sobres firmados, los mismos que reparte el enlace.
-      const de = meta.fromPubkey as string | null
+      const de = meta.fromPubkey ?? null
       if (msg.type === 'ROOM_PREDICTION' && typeof msg.env === 'string') {
         this.handlers.onPrediction(msg.env)
         // Se le devuelve todo lo que sé, pero DESPUÉS de aplicar lo suyo: así el que

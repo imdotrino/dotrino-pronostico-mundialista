@@ -7,7 +7,8 @@ import { getReputation } from '../lib/reputation'
 import { buildTrustMap, computeDerivedRating, shortKey } from '../lib/rating'
 import { resolveCodeToIdentity, ProxyTokenError } from '../lib/proxy'
 import { useNotifications } from '../lib/notifications'
-import { createVaultProfileProvider } from '@dotrino/profile'
+import { createVaultProfileProvider, type DotrinoProfile, type ProfileProvider } from '@dotrino/profile'
+import type { ComponentPublicInstance } from 'vue'
 import '@dotrino/profile'
 
 const { t, te, locale } = useI18n()
@@ -60,16 +61,17 @@ const ranking = computed(() =>
 
 // Provider compartido del ecosistema para <dotrino-profile> (vault + registro
 // de reputación). Mismo que usan el resto de apps; no se reimplementa la tarjeta.
-let _provider: any = null
+let _provider: ProfileProvider | null = null
 async function ensureProvider () {
   if (_provider) return _provider
   const [identity, reputation] = await Promise.all([getIdentity(), getReputation()])
   if (reputation) _provider = createVaultProfileProvider({ identity, reputation })
   return _provider
 }
-function bindProfile (el: any) {
-  if (!el) return
-  ensureProvider().then((p) => { if (p) el.provider = p })
+function bindProfile (el: Element | ComponentPublicInstance | null) {
+  if (!(el instanceof HTMLElement)) return
+  const profile = el as DotrinoProfile
+  ensureProvider().then((p) => { if (p) profile.provider = p })
 }
 // Perfil de un peer (contacto o ranking): tarjeta compartida en modo edición
 // (permite calificarlo). Al guardar, refrescamos para recomputar el ranking.
@@ -83,7 +85,7 @@ function openPeerProfile (pk: string, name?: string | null) {
 function onPeerRate () { refresh() }
 
 // Mi nombre lo guarda el propio Web Component (mode="self") en el vault.
-function onMyName (e: any) { const n = e?.detail?.name; if (typeof n === 'string') { myNick.value = n; emit('changed') } }
+function onMyName (e: CustomEvent<{ name?: unknown }>) { const n = e?.detail?.name; if (typeof n === 'string') { myNick.value = n; emit('changed') } }
 
 async function load () {
   const inst = await getIdentity()
