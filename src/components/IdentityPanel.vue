@@ -216,9 +216,7 @@ async function removeContact (pk: string) {
         <button :class="{ on: tab === 'rankings' }" @click="tab = 'rankings'">{{ t('identity.tabRankings') }}</button>
       </nav>
 
-      <i18n-t v-if="unreachable" keypath="identity.unreachable" tag="p" class="warn" scope="global">
-        <template #vault><code>id.dotrino.com</code></template>
-      </i18n-t>
+      <p v-if="unreachable" class="warn">{{ t('identity.unreachable') }}</p>
 
       <!-- PERFIL: tarjeta compartida del ecosistema en modo self (nombre editable
            guardado en el vault + mi reputación). `allow-edit` es obligatorio desde

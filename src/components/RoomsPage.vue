@@ -294,9 +294,7 @@ watch(activeRoom, (r) => {
 <template>
   <!-- HOME: sin sala activa → crear / unirse (inline, como página) -->
   <div v-if="!activeRoom" class="home scrolly">
-    <i18n-t v-if="unreachable" keypath="identity.unreachable" tag="p" class="warn" scope="global">
-      <template #vault><code>id.dotrino.com</code></template>
-    </i18n-t>
+    <p v-if="unreachable" class="warn">{{ t('identity.unreachable') }}</p>
 
     <div class="cards">
       <section class="card">
